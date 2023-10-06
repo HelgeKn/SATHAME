@@ -1,0 +1,123 @@
+body {
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #7a7a7a;
+    background-color: #f0e8e8;
+  }
+  * {
+    box-sizing: border-box;
+  }
+  /*
+   * Formatting the header area
+   */
+  header {
+    background-color: #87bcdf;
+    height: 35px;
+    width: 100%;
+    opacity: .9;
+    margin-bottom: 10px;
+  }
+  header h1.logo {
+    margin: 0;
+    font-size: 1.7em;
+    color: #fff;
+    text-transform: uppercase;
+    float: left;
+  }
+  header h1.logo:hover {
+    color: #fff;
+    text-decoration: none;
+  }
+  /*
+   * Centering the body content
+   */
+  .container {
+    width: 98%;
+    margin: 0 auto;
+    background-color: #fff;
+  }
+  .container-left-list {
+    border-radius: 10px;
+    width: 15%;
+    height: 93%;
+    margin-right: 1%;
+    margin-left: 1%;
+    float: left;
+    background-color: #fff;
+  }
+  .container-right-list {
+    border-radius: 10px;
+    width: 15%;
+    height: 93%;
+    float: right;
+    margin-right: 1%;
+    margin-left: 1%;
+    background-color: #fff;
+  }
+  .input-preview {
+    position: relative;
+    top: -29px;
+    border-radius: 10px;
+    width: 66%;
+    height: 50%;
+    margin: 0 auto;
+    background-color: #fff;
+  }
+  .label-frame {
+    position: relative;
+    top: -19px;
+    width: 66%;
+    height: 41.8%;
+    margin: 0 auto;
+  }
+  .prediction {
+    border-radius: 10px;
+    float: left;
+    height: 100%;
+    width: 49.3%;
+    background-color: #fff;
+  }
+  .truelabel {
+    border-radius: 10px;
+    float: right;
+    height: 100%;
+    width: 49.3%;
+    background-color: #fff;
+  }
+  div.home {
+    padding: 10px 0 30px 0;
+    background-color: #fff;
+    -webkit-border-radius: 6px;
+       -moz-border-radius: 6px;
+            border-radius: 6px;
+  }
+  h2 {
+    font-size: 3em;
+    margin-top: 40px;
+    text-align: center;
+    letter-spacing: -2px;
+  }
+  h3 {
+    font-size: 1.7em;
+    font-weight: 100;
+    margin-top: 30px;
+    text-align: center;
+    letter-spacing: -1px;
+    color: #999;
+  }
+  .menu {
+    float: right;
+    margin-top: 8px;
+  }
+  .menu li {
+    display: inline;
+  }
+  .menu li + li {
+    margin-left: 35px;
+  }
+  .menu li a {
+    color: #444;
+    text-decoration: none;
+  }
