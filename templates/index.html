@@ -17,30 +17,441 @@
     </header>
     <div class="container-left-list">
         {% block contenta %}
-        <h2>{{contenta}}</h2>
+        <h3>{{contenta}}</h3>
+        <div id="dataset-statistics"></div>
+        <ul id="error-example-list" class="container-left-list scrollable-list">
+          {% for error in error_example_list %}
+            <li onclick="selectError('{{ error }}')">
+              <span class="error-text">{{ error }}</span>
+              <span class="checkmark"></span>
+            </li>
+          {% endfor %}
+        </ul>
         {% endblock %}
     </div>
     <div class="container-right-list">
         {% block contentb %}
-        <h2>{{contentb}}</h2>
+        <h3>{{contentb}}</h3>
+        <div id="schema-dialog">
+          <select id="select-schema" onchange="handleSelectionChange(this.value)">
+            {% if schema_list|length == 0 %}
+              <option disabled selected value="">No schemas available</option>  
+            {% else %}
+              {% for schema in schema_list %}
+                <option value="{{ schema }}">{{ schema }}</option>
+              {% endfor %}
+            {% endif %}
+          </select>
+          <button id="save-button" onclick="saveSchema()">Save Schema</button>
+        </div>
+        <ul id="error-category-list"></ul>
+        <div id="create-dialog">
+          <input id="create-input" type="text" placeholder="Enter new name">
+          <div id="create-buttons">
+            <button id="create-button" onclick="createSchema(document.getElementById('create-input').value)">Create Schema</button>
+            <button id="create-button" onclick="createCategory(document.getElementById('create-input').value)">Create Category</button>
+          </div>
+        </div>
+        <div id="selected-combinations"></div>
         {% endblock %}
     </div>
     <div class="input-preview">
         {% block datainput %}
-        <h2>{{datainput}}</h2>
+        <h3>{{datainput}}</h3>
+        <div id="entry"></div>
+        <div id="full-input"></div>
         {% endblock %}
     </div>
     <div class="label-frame">
         <div class="prediction">
             {% block prediction %}
-            <h2>{{prediction}}</h2>
+            <h3>{{prediction}}</h3>
+            <div id="prediction"></div>
+            <div id="prediction-dev"></div>
             {% endblock %}
         </div>
         <div class="truelabel">
             {% block truelabel %}
-            <h2>{{truelabel}}</h2>
+            <h3>{{truelabel}}</h3>
+            <div id="label"></div>
+            <div id="label-dev"></div>
             {% endblock %}
         </div>
     </div>
+
+    <div id="data" style="display: none;">{{ file_data|tojson|safe }}</div>
+
+    <script>
+      // Set default values
+      var defaultEntry = "Please select an error example";
+      var defaultPrediction = "Display for the model prediction";
+      var defaultLabel = "Display for the true label";
+      
+      // Get the data from the hidden div element and parse it into a JavaScript object
+      var data = JSON.parse(document.getElementById('data').textContent);
+
+      // Store the initial value of datainput in a JavaScript variable
+      var defaultDataInput = document.querySelector('.input-preview h3').textContent;
+
+      // Store the error and category combinations for the schema
+      var selectedCombinations = [];
+
+      function selectError(error) {
+        // Get all list items
+        var errorListItems = document.getElementById('error-example-list').querySelectorAll('li');
+
+        var isSelected = false;
+
+        // Get all category list items
+         var categoryListItems = document.getElementById('error-category-list').querySelectorAll('li');
+
+        // Loop over each list item
+        errorListItems.forEach(function(fullSpan) {
+          var errorItem = fullSpan.querySelector('.error-text')
+          var checkmarkSpan = fullSpan.querySelector('.checkmark');
+
+          // If the list item's text content matches the error example and it is not already selected, select it
+          if (errorItem.textContent === error && !errorItem.classList.contains('selected')) {
+            fullSpan.classList.add('selected');
+            isSelected = true;
+
+          // Otherwise, deselect it
+          } else {
+            fullSpan.classList.remove('selected');
+          }
+        });
+
+        // Deselect all category list items
+        categoryListItems.forEach(function(categoryItem) {
+          categoryItem.classList.remove('selected');
+        });
+
+        // Update category list selection
+        if (isSelected) {
+          // Check if selected category exists in selectedCombinations
+          var selectedCategory = selectedCombinations.find(function(combination) {
+            return combination.error === error;
+          });
+
+          // If selected category exists, select it
+          if (selectedCategory) {
+            categoryListItems.forEach(function(categoryItem) {
+              if (categoryItem.textContent === selectedCategory.category) {
+                categoryItem.classList.add('selected');
+              }
+            });
+          }
+        } 
+
+        // Get the nested list from data that has the same first value as selected error example
+        var nestedList = data.find(function(list) {
+          return list[0] === error;
+        });
+
+        // Get all values of the nested list
+        var prediction = nestedList[1];
+        var prediction_dev = nestedList[2];
+        var label = nestedList[3];
+        var label_dev = nestedList[4];
+        var full_input = nestedList[nestedList.length - 1];
+
+        // Populate all fields with respected values of the nested list
+        var textBox = document.getElementById('prediction');
+        textBox.textContent = prediction;
+        var textBox = document.getElementById('prediction-dev');
+        textBox.textContent = prediction_dev;
+        var textBox = document.getElementById('label');
+        textBox.textContent = label;
+        var textBox = document.getElementById('label-dev');
+        textBox.textContent = label_dev;
+        var textBox = document.getElementById('full-input');
+        textBox.textContent = full_input;
+        var textBox = document.getElementById('entry');
+        textBox.textContent = error;
+        
+        if(!isSelected){
+          // Set default values
+          var textBox = document.getElementById('prediction');
+          textBox.textContent = defaultPrediction;
+          var textBox = document.getElementById('label');
+          textBox.textContent = defaultLabel;
+          var textBox = document.getElementById('entry');
+          textBox.textContent = defaultEntry;
+
+          // Clear other fields
+          var textBox = document.getElementById('prediction-dev');
+          textBox.textContent = "";
+          var textBox = document.getElementById('label-dev');
+          textBox.textContent = "";
+          var textBox = document.getElementById('full-input');
+          textBox.textContent = "";
+        }
+        
+        reloadValues();
+
+        // TODO - Remove this line
+        updateSelectedCombinationsDisplay();
+      }
+
+      function selectCategory(category) {
+        // Check if an error is selected
+        var selectedErrorList = document.getElementById('error-example-list').querySelector('.selected');
+        if (!selectedErrorList) {
+          // If no error is selected, return immediately
+          return;
+        }
+
+        var selectedError = selectedErrorList.querySelector('.error-text');
+
+        // Get all list items
+        var categoryListItem = document.getElementById('error-category-list').querySelectorAll('li');
+
+        // Loop over each list item
+        categoryListItem.forEach(function(categoryItem) {
+          if (categoryItem.textContent === category) {
+            // If the list item's text content matches the category and it is not already selected, select it and push new combination
+            if (!categoryItem.classList.contains('selected')) {
+              categoryItem.classList.add('selected');
+
+              // Check if a combination with the same error but different category exists
+              var oldCombinationIndex = selectedCombinations.findIndex(function(combination) {
+                return combination.error === selectedError.textContent && combination.category !== category;
+              });
+
+              // If such a combination exists, remove it and deselect the category
+              if (oldCombinationIndex !== -1) {
+                // Get the old category from selectedCombinations
+                var oldCategory = selectedCombinations[oldCombinationIndex].category;
+
+                // Remove the old combination from selectedCombinations
+                selectedCombinations.splice(oldCombinationIndex, 1);
+
+                // Find the old category item in the DOM and deselect it
+                var oldCategoryItem = Array.from(categoryListItem).find(function(item) {
+                  return item.textContent === oldCategory;
+                });
+                if (oldCategoryItem) {
+                  oldCategoryItem.classList.remove('selected');
+                }
+              }
+
+              // Check if the combination already exists in selectedCombinations
+              var combinationExists = selectedCombinations.some(function(combination) {
+                return combination.error === selectedError.textContent && combination.category === category;
+              });
+
+              // If the combination does not already exist, push it to selectedCombinations
+              if (!combinationExists) {
+                selectedCombinations.push({ error: selectedError.textContent, category: category });
+              }
+            }
+            // Otherwise, deselect it and remove the combination
+            else if (categoryItem.classList.contains('selected')) {
+              selectedCombinations = selectedCombinations.filter(function(combination) {
+                  return combination.error !== selectedError.textContent;
+              });
+              categoryItem.classList.remove('selected');
+            }
+          }
+        });
+
+        reloadValues();
+
+        // TODO - Remove this line
+        updateSelectedCombinationsDisplay();
+      }
+
+      function createCategory(inputValue){
+        // Get the error-category-list
+        var list = document.getElementById('error-category-list');
+
+        // If inputValue is empty or already exists in the list, return
+        var listItems = list.querySelectorAll('li');
+        var inputValueExists = Array.from(listItems).some(function(item) {
+          return item.textContent === inputValue;
+        });
+        if (!inputValue || inputValueExists) {
+          return;
+        }
+
+        // Create a new li element
+        var listItem = document.createElement('li');
+
+        // Set the text content of the li element to inputValue
+        listItem.textContent = inputValue;
+
+        // Add an onclick attribute to the li element that calls selectCategory with inputValue
+        listItem.addEventListener('click', function() {
+              selectCategory(inputValue);
+            });
+
+        // Append the li element to the list
+        list.appendChild(listItem);
+
+        // Reset the value of the input field to its default
+        document.getElementById('create-input').value = '';
+      }
+
+      function createSchema(inputValue){
+        var selectSchema = document.getElementById("select-schema");
+
+        // If inputValue is empty or already exists in the list, return
+        var listItems = selectSchema.querySelectorAll('option');
+        var inputValueExists = Array.from(listItems).some(function(item) {
+          return item.textContent === inputValue;
+        });
+        if (!inputValue || inputValueExists) {
+          return;
+        }
+
+        // Create a new option element 
+        var option = document.createElement('option'); 
+        newOption = document.createElement("option");
+        newOption.textContent = inputValue;
+
+        // Check if schema_list is empty
+        schema_list_empty_flag = false;
+        if (listItems.length === 1 && listItems[0].textContent === 'No schemas available') {
+          schema_list_empty_flag = true;
+        }
+
+        // If schema_list was empty, select the new option
+        if (schema_list_empty_flag) {
+          newOption.setAttribute('selected', 'selected');
+        }
+
+        // Add the new option for the select element
+        selectSchema.appendChild(newOption);
+
+        // If the select element contains the default option, remove it
+        var defaultOption = selectSchema.querySelector('option[value=""]');
+        if (defaultOption) {
+          selectSchema.removeChild(defaultOption);
+        }
+
+        // Clear the input field
+        document.getElementById('create-input').value = '';
+      }
+
+      function saveSchema(){
+        // Get the currently selected schema
+        var selectedSchema = document.getElementById('select-schema').value;
+
+        // Add the selected schema to selectedCombinations
+        var dataToSend = {
+          selectedSchema: selectedSchema,
+          combinations: selectedCombinations
+        };
+
+        // Convert dataToSend to JSON
+        var dataToSendJson = JSON.stringify(dataToSend);
+
+        // Send selected Schema and Combinations to main.py
+        fetch('/save-schema', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: dataToSendJson
+        })
+        .then(response => response.json())
+        .then(data => {
+          // Handle the response data
+          console.log(data);
+        })
+        .catch(error => {
+          // Handle the error
+          console.error('Error:', error);
+        });
+      }
+
+      function handleSelectionChange(schema){
+        // Make a GET request to the Flask route that returns the schema content
+        fetch(`/get-schema/${schema}`)
+        .then(response => response.json())
+        .then(data => {
+          // Write the schema content into selectedCombinations
+          selectedCombinations = data;
+
+          // Clear the category list
+          var categoryList = document.getElementById('error-category-list');
+          while (categoryList.firstChild) {
+            categoryList.removeChild(categoryList.firstChild);
+          }
+
+          // Create a Set from the categories in selectedCombinations
+          var categories = new Set(selectedCombinations.map(combination => combination.category));
+
+          // Populate the category list with the different categories from the new schema
+          categories.forEach(function(category) {
+            var newListItem = document.createElement('li');
+            newListItem.textContent = category;
+
+            // Add an onClick event listener to the new list item
+            newListItem.addEventListener('click', function() {
+              selectCategory(category);
+            });
+
+            categoryList.appendChild(newListItem);
+          });
+
+          reloadValues();
+
+          // Update the display of selected combinations
+          updateSelectedCombinationsDisplay();
+        })
+        .catch(error => {
+          // Handle the error
+          console.error('Error:', error);
+        });
+      }
+
+      function reloadValues() {
+        // Get a reference to the error list element
+        var errorListItems = document.getElementById('error-example-list').querySelectorAll('li');
+
+        var countChecks = 0;
+
+        errorListItems.forEach(function(fullSpan) {
+          var checkmarkSpan = fullSpan.querySelector('.checkmark');
+          var errorItem = fullSpan.querySelector('.error-text')
+
+          // If the error has a selected category, add a checkmark
+          if (selectedCombinations.some(combination => combination.error === errorItem.textContent)) {
+            checkmarkSpan.innerHTML = '&#10003;';
+            countChecks++;
+          } else {
+            checkmarkSpan.innerHTML = '';
+          }
+        });
+
+        // Update the dataset statistics
+        var count = Object.keys(data).length;
+
+        var datasetStatisticsElement = document.getElementById('dataset-statistics');
+        datasetStatisticsElement.textContent = ` ${count} Errors | ${countChecks} Categorized`;
+      }
+      
+      // Temporary display of selected combinations
+      function updateSelectedCombinationsDisplay() {
+        var selectedCombinationsElement = document.getElementById('selected-combinations');
+        selectedCombinationsElement.textContent = JSON.stringify(selectedCombinations, null, 2);
+      }
+
+      window.onload = function() {
+        // Populate all fields with default values
+        var textBox = document.getElementById('prediction');
+        textBox.textContent = defaultPrediction;
+        var textBox = document.getElementById('entry');
+        textBox.textContent = defaultEntry;
+        var textBox = document.getElementById('label');
+        textBox.textContent = defaultLabel;
+
+        var selectSchema = document.getElementById('select-schema');
+        if (selectSchema.options.length > 0) {
+          handleSelectionChange(selectSchema.options[0].value);
+        }
+      };
+      </script>
   </body>
 </html>

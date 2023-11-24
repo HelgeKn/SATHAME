@@ -1,0 +1,30 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--task_name=WSD",
+                "--eval_data_dir=./Thesis_results/Datasets/ALL_test_sent_cls_ws.csv",
+                "--output_dir=./Thesis_results",
+                "--bert_model=./Thesis_results",
+                "--do_test",
+                "--do_lower_case",
+                "--max_seq_length=128",
+                "--train_batch_size=64",
+                "--eval_batch_size=128",
+                "--learning_rate=2e-5",
+                "--num_train_epochs=6.0",
+                "--seed 1314"
+            ]
+        }
+    ]
+}

@@ -47,6 +47,19 @@ body {
     float: left;
     background-color: #fff;
   }
+  .container-left-list.scrollable-list {
+    width: 90%;
+    height: 83%;
+    margin-left: 5%;
+    overflow-y: auto;
+  }
+  .selected {
+    background-color: #ddd;
+  }
+  #dataset-statistics{
+    padding-bottom: 10px;
+  }
+
   .container-right-list {
     border-radius: 10px;
     width: 15%;
@@ -56,22 +69,55 @@ body {
     margin-left: 1%;
     background-color: #fff;
   }
+  #schema-dialog {
+    margin-bottom: 20px;
+  }
+  #schema-dialog select {
+    width: 120px;
+  }
+  #create-dialog {
+    position: fixed;
+    bottom: 5%;
+    right: 2.5%;
+  }
+  #create-input {
+    text-align: center;
+    width: 220px;
+    margin-bottom: 10px;
+  }
+
   .input-preview {
     position: relative;
-    top: -29px;
+    top: -20px;
     border-radius: 10px;
     width: 66%;
     height: 50%;
     margin: 0 auto;
     background-color: #fff;
   }
+  .input-preview h3 {
+    padding-top: 20px;
+  }
+  .input-preview div {
+    font-size: 1.3em;
+    padding-bottom: 20px;
+    margin-left: 10%;
+    margin-right: 10%;
+  }
+
   .label-frame {
     position: relative;
-    top: -19px;
+    top: -10px;
     width: 66%;
     height: 41.8%;
     margin: 0 auto;
   }
+  .label-frame div {
+    font-size: 1.1em;
+    padding-bottom: 20px;
+    top: 10%;
+  }
+
   .prediction {
     border-radius: 10px;
     float: left;
@@ -79,6 +125,11 @@ body {
     width: 49.3%;
     background-color: #fff;
   }
+  .prediction div {
+    margin-left: 10%;
+    margin-right: 10%;
+  }
+
   .truelabel {
     border-radius: 10px;
     float: right;
@@ -86,6 +137,11 @@ body {
     width: 49.3%;
     background-color: #fff;
   }
+  .truelabel div {
+    margin-left: 10%;
+    margin-right: 10%;
+  }
+
   div.home {
     padding: 10px 0 30px 0;
     background-color: #fff;
@@ -107,6 +163,9 @@ body {
     letter-spacing: -1px;
     color: #999;
   }
+  div {
+    text-align: center;
+  }
   .menu {
     float: right;
     margin-top: 8px;
@@ -120,4 +179,17 @@ body {
   .menu li a {
     color: #444;
     text-decoration: none;
+  }
+  ul {
+    list-style-type: none; /* Removes the bullet points */
+    padding: 0;
+    margin: 0;
+  }
+  li {
+    text-align: center;
+    padding: 15px 0; /* Adds space above and below each list item */
+    cursor: pointer; /* Changes the cursor when hovering over a list item */
+  }
+  li:hover {
+    background-color: #ddd; /* Changes the background color when hovering over a list item */
   }
