@@ -3,7 +3,7 @@ body {
     margin: 0;
     padding: 0;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    color: #7a7a7a;
+    color: #000000;
     background-color: #f0e8e8;
   }
   * {
@@ -86,6 +86,11 @@ body {
     margin-bottom: 10px;
   }
 
+  #error-category-list .counter {
+    position: absolute;
+    right: 2%;
+  }
+
   .input-preview {
     position: relative;
     top: -20px;
@@ -161,7 +166,7 @@ body {
     margin-top: 30px;
     text-align: center;
     letter-spacing: -1px;
-    color: #999;
+    color: #000000;
   }
   div {
     text-align: center;

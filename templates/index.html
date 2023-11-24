@@ -45,6 +45,7 @@
           <button id="save-button" onclick="saveSchema()">Save Schema</button>
         </div>
         <ul id="error-category-list"></ul>
+        <div id="selected-combinations"></div>
         <div id="create-dialog">
           <input id="create-input" type="text" placeholder="Enter new name">
           <div id="create-buttons">
@@ -52,7 +53,6 @@
             <button id="create-button" onclick="createCategory(document.getElementById('create-input').value)">Create Category</button>
           </div>
         </div>
-        <div id="selected-combinations"></div>
         {% endblock %}
     </div>
     <div class="input-preview">
@@ -111,7 +111,7 @@
           var checkmarkSpan = fullSpan.querySelector('.checkmark');
 
           // If the list item's text content matches the error example and it is not already selected, select it
-          if (errorItem.textContent === error && !errorItem.classList.contains('selected')) {
+          if (errorItem.textContent === error && !fullSpan.classList.contains('selected')) {
             fullSpan.classList.add('selected');
             isSelected = true;
 
@@ -136,7 +136,8 @@
           // If selected category exists, select it
           if (selectedCategory) {
             categoryListItems.forEach(function(categoryItem) {
-              if (categoryItem.textContent === selectedCategory.category) {
+              var categorySpan = categoryItem.querySelector('.category-text').textContent;
+              if (categorySpan === selectedCategory.category) {
                 categoryItem.classList.add('selected');
               }
             });
@@ -208,7 +209,10 @@
 
         // Loop over each list item
         categoryListItem.forEach(function(categoryItem) {
-          if (categoryItem.textContent === category) {
+          // Get the category span
+          var categorySpan = categoryItem.querySelector('.category-text').textContent;
+
+          if (categorySpan === category) {
             // If the list item's text content matches the category and it is not already selected, select it and push new combination
             if (!categoryItem.classList.contains('selected')) {
               categoryItem.classList.add('selected');
@@ -228,7 +232,8 @@
 
                 // Find the old category item in the DOM and deselect it
                 var oldCategoryItem = Array.from(categoryListItem).find(function(item) {
-                  return item.textContent === oldCategory;
+                  var categorySpan = item.querySelector('.category-text');
+                  return categorySpan.textContent === oldCategory;
                 });
                 if (oldCategoryItem) {
                   oldCategoryItem.classList.remove('selected');
@@ -243,6 +248,8 @@
               // If the combination does not already exist, push it to selectedCombinations
               if (!combinationExists) {
                 selectedCombinations.push({ error: selectedError.textContent, category: category });
+                // Update the display of selected combinations
+                updateSelectedCombinationsDisplay();
               }
             }
             // Otherwise, deselect it and remove the combination
@@ -251,14 +258,13 @@
                   return combination.error !== selectedError.textContent;
               });
               categoryItem.classList.remove('selected');
+              // Update the display of selected combinations
+              updateSelectedCombinationsDisplay();
             }
           }
         });
 
         reloadValues();
-
-        // TODO - Remove this line
-        updateSelectedCombinationsDisplay();
       }
 
       function createCategory(inputValue){
@@ -277,8 +283,19 @@
         // Create a new li element
         var listItem = document.createElement('li');
 
-        // Set the text content of the li element to inputValue
-        listItem.textContent = inputValue;
+        // Create the category span
+        var categorySpan = document.createElement('span');
+        categorySpan.classList.add('category-text');
+        categorySpan.textContent = inputValue;
+
+        // Create the counter span
+        var counterSpan = document.createElement('span');
+        counterSpan.classList.add('counter');
+        counterSpan.textContent = '0';
+
+        // Append the spans to the li element
+        listItem.appendChild(categorySpan);
+        listItem.appendChild(counterSpan);
 
         // Add an onclick attribute to the li element that calls selectCategory with inputValue
         listItem.addEventListener('click', function() {
@@ -372,6 +389,9 @@
         .then(data => {
           // Write the schema content into selectedCombinations
           selectedCombinations = data;
+          
+          // Update the display of selected combinations
+          updateSelectedCombinationsDisplay();
 
           // Clear the category list
           var categoryList = document.getElementById('error-category-list');
@@ -385,7 +405,20 @@
           // Populate the category list with the different categories from the new schema
           categories.forEach(function(category) {
             var newListItem = document.createElement('li');
-            newListItem.textContent = category;
+
+            // Create the category span
+            var categorySpan = document.createElement('span');
+            categorySpan.classList.add('category-text');
+            categorySpan.textContent = category;
+
+            // Create the counter span
+            var counterSpan = document.createElement('span');
+            counterSpan.classList.add('counter');
+            counterSpan.textContent = countOccurrences(category);
+
+            // Append the spans to the li element
+            newListItem.appendChild(categorySpan);
+            newListItem.appendChild(counterSpan);
 
             // Add an onClick event listener to the new list item
             newListItem.addEventListener('click', function() {
@@ -396,9 +429,6 @@
           });
 
           reloadValues();
-
-          // Update the display of selected combinations
-          updateSelectedCombinationsDisplay();
         })
         .catch(error => {
           // Handle the error
@@ -430,12 +460,24 @@
 
         var datasetStatisticsElement = document.getElementById('dataset-statistics');
         datasetStatisticsElement.textContent = ` ${count} Errors | ${countChecks} Categorized`;
+
+        // Update the category counters
+        var categoryListItems = document.getElementById('error-category-list').querySelectorAll('li');
+        categoryListItems.forEach( function(categoryItem) {
+          var category = categoryItem.querySelector('.category-text').textContent;
+          var counter = categoryItem.querySelector('.counter');
+          counter.textContent = countOccurrences(category);
+        });
       }
       
       // Temporary display of selected combinations
       function updateSelectedCombinationsDisplay() {
         var selectedCombinationsElement = document.getElementById('selected-combinations');
         selectedCombinationsElement.textContent = JSON.stringify(selectedCombinations, null, 2);
+      }
+
+      function countOccurrences(value) {
+        return selectedCombinations.filter(item => item.category === value).length;
       }
 
       window.onload = function() {
