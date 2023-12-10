@@ -11,6 +11,7 @@
         <strong><nav>
           <ul class="menu">
             <li><a href="{{ url_for('home') }}">Home</a></li>
+            <li><a href="{{ url_for('home') }}">Models</a></li>
           </ul>
         </nav></strong>
       </div>
@@ -45,7 +46,7 @@
           <button id="save-button" onclick="saveSchema()">Save Schema</button>
         </div>
         <ul id="error-category-list"></ul>
-        <div id="selected-combinations"></div>
+        <div id="selected-combinations" style="display: none"></div>
         <div id="create-dialog">
           <input id="create-input" type="text" placeholder="Enter new name">
           <div id="create-buttons">
@@ -248,6 +249,10 @@
               // If the combination does not already exist, push it to selectedCombinations
               if (!combinationExists) {
                 selectedCombinations.push({ error: selectedError.textContent, category: category });
+
+                // Precombine all identical errors with the same category
+                updateForRelatedErrors(selectedError.textContent, category);
+
                 // Update the display of selected combinations
                 updateSelectedCombinationsDisplay();
               }
@@ -470,6 +475,54 @@
         });
       }
       
+      // Only used inside selectCategory on select, deselect and change
+      function updateForRelatedErrors(thisError, thisCategory){
+        var fullErrorList = document.getElementById('error-example-list').querySelectorAll('li');
+
+        console.log(thisError, thisCategory);
+
+        // Select data row for selected error
+        var nestedList = data.find(function(list) {
+          return list[0] === thisError;
+        });
+
+        // Get prediction and label for the selected error
+        var orgPrediction = nestedList[1];
+        var orgLabel = nestedList[3];
+
+        fullErrorList.forEach(function(fullSpan){
+          var errorItem = fullSpan.querySelector('.error-text');
+
+          // Select data row for iterated error
+          var nestedList = data.find(function(list) {
+            return list[0] === errorItem.textContent;
+          });
+
+          // Get prediction and label for the selected error
+          var testPrediction = nestedList[1];
+          var testLabel = nestedList[3];
+
+          if (testPrediction === orgPrediction && testLabel === orgLabel) {
+            // Check if a combination with the same error but different category exists
+            var oldCombinationIndex = selectedCombinations.findIndex(function(combination) {
+              return combination.error === errorItem.textContent && combination.category !== thisCategory;
+            });
+
+            if (oldCombinationIndex === -1) {
+              // Check if the combination already exists in selectedCombinations
+              var combinationExists = selectedCombinations.some(function(combination) {
+                return combination.error === errorItem.textContent && combination.category === thisCategory;
+              });
+
+              // If the combination does not already exist, push it to selectedCombinations
+              if (!combinationExists) {
+                selectedCombinations.push({ error: errorItem.textContent, category: thisCategory });
+              }
+            }
+          }
+        })
+      }
+
       // Temporary display of selected combinations
       function updateSelectedCombinationsDisplay() {
         var selectedCombinationsElement = document.getElementById('selected-combinations');

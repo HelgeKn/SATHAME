@@ -32,7 +32,7 @@ def handle_post():
     try:
         with open(json_file_path, 'w') as file:
             json.dump(data['combinations'], file)
-        return 'Success!', 200
+        return jsonify({'message': 'Success!'}), 200
     except Exception as e:
         return str(e), 500
     
@@ -47,4 +47,4 @@ def get_schema(schema):
     return str(e), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', debug=True)

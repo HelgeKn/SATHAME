@@ -30,6 +30,7 @@ body {
     color: #fff;
     text-decoration: none;
   }
+
   /*
    * Centering the body content
    */
@@ -173,10 +174,15 @@ body {
   }
   .menu {
     float: right;
-    margin-top: 8px;
+    align-items: center;
   }
   .menu li {
     display: inline;
+    line-height: 35px;
+  }
+  .menu li:hover{
+    background-color: #87bcdf;
+    line-height: 35px;
   }
   .menu li + li {
     margin-left: 35px;
@@ -184,6 +190,9 @@ body {
   .menu li a {
     color: #444;
     text-decoration: none;
+  }
+  .menu li a:hover {
+    font-weight: bold;
   }
   ul {
     list-style-type: none; /* Removes the bullet points */
