@@ -120,6 +120,7 @@ def generate_sentence_set(token_set_path):
             if current_sentence_id != sentence_id:
                 predictions = "@@@".join(prediction_list)
                 labels = "@@@".join(label_list)
+                current_sentence_text = current_sentence_text.rstrip('\n')
                 output.write(f'{current_sentence_id}###{predictions}###{labels}###{current_sentence_text}\n')
                 current_sentence_id = sentence_id
                 current_sentence_text = split_line[5]
