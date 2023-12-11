@@ -8,30 +8,26 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-    with open('static/datasets/SemEval/wsd.txt', 'r') as file:
-        data = file.read()
-
-    # Split the data on the "###" separator and store each line in a nested list
-    data = [line.split("###") for line in data.split("\n") if line]
-    
-    # Create a list with the first element of each nested list
-    error_example_list = [line[0] for line in data]
-
     # Get the list of available schemas
     schema_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'schemas')
     schema_list = [os.path.splitext(f)[0] for f in os.listdir(schema_dir) if os.path.isfile(os.path.join(schema_dir, f))]
     
-    return render_template("index.html", contenta="SemEval", contentb="Error schema", datainput="Data entry", prediction="Prediction", truelabel="Label", file_data=data, error_example_list=error_example_list, schema_list = schema_list)
+    return render_template("index.html", contenta="SemEval", contentb="Error schema", datainput="Data entry", prediction="Prediction", truelabel="Label", schema_list = schema_list)
 
 @app.route('/save-schema', methods=['POST'])
 def handle_post():
     data = request.get_json()
     selected_schema = data['selectedSchema']
+    dataset = data['dataset']
     json_file_path = f'static/schemas/{selected_schema}.json'
 
     try:
         with open(json_file_path, 'w') as file:
-            json.dump(data['combinations'], file)
+            schema_data = {
+                'combinations' : data['combinations'],
+                'dataset' : dataset
+            }
+            json.dump(schema_data, file)
         return jsonify({'message': 'Success!'}), 200
     except Exception as e:
         return str(e), 500
@@ -45,6 +41,39 @@ def get_schema(schema):
     return jsonify(data), 200
   except Exception as e:
     return str(e), 500
+  
+@app.route('/get-dataset-names', methods=['GET'])
+def get_dataset_names():
+    dataset_path = os.path.join(os.path.dirname(__file__), 'static/datasets')
+    try:
+        dataset_names = [name for name in os.listdir(dataset_path) if os.path.isdir(os.path.join(dataset_path, name))]
+        return jsonify(dataset_names), 200
+    except Exception as e:
+        return str(e), 500
+    
+@app.route('/get-dataset/<dataset_name>', methods=['GET'])
+def get_dataset(dataset_name):
+    dataset_path = os.path.join(os.path.dirname(__file__), 'static/datasets', dataset_name, f'{dataset_name}.txt')
+    try:
+        with open(dataset_path, 'r') as file:
+            data = file.read()
+        
+        # Parse the data
+        parsed_data = []
+        for line in data.splitlines():
+          if line: # Ignore empty lines
+            overall_values = line.split('###')
+            for i in range(1, 3): # Parse predictions and labels
+               overall_values[i] = [item.split('|||') for item in overall_values[i].split('@@@')]
+            parsed_data.append({
+                'id': overall_values[0],
+                'prediction': overall_values[1],
+                'label': overall_values[2],
+                'text': overall_values[-1]
+            })
+        return jsonify({'data': parsed_data}), 200
+    except Exception as e:
+        return str(e), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)

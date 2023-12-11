@@ -21,13 +21,9 @@
         <h3>{{contenta}}</h3>
         <div id="dataset-statistics"></div>
         <ul id="error-example-list" class="container-left-list scrollable-list">
-          {% for error in error_example_list %}
-            <li onclick="selectError('{{ error }}')">
-              <span class="error-text">{{ error }}</span>
-              <span class="checkmark"></span>
-            </li>
-          {% endfor %}
+          <!-- The list items will be added dynamically in JavaScript -->
         </ul>
+        <p id="default-error-list-text" style="display: block;">Select schema</p>
         {% endblock %}
     </div>
     <div class="container-right-list">
@@ -67,20 +63,30 @@
         <div class="prediction">
             {% block prediction %}
             <h3>{{prediction}}</h3>
-            <div id="prediction"></div>
-            <div id="prediction-dev"></div>
+            <ul id="prediction-list"></ul>
+            <p id="default-error-list-text" style="display: block;"></p>
             {% endblock %}
         </div>
         <div class="truelabel">
             {% block truelabel %}
             <h3>{{truelabel}}</h3>
-            <div id="label"></div>
-            <div id="label-dev"></div>
+            <ul id="label-list"></ul>
+            <p id="default-error-list-text" style="display: block;"></p>
             {% endblock %}
         </div>
     </div>
 
-    <div id="data" style="display: none;">{{ file_data|tojson|safe }}</div>
+    <!-- The Save Schema Modal -->
+    <div id="saveSchemaModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Select a Dataset</h2>
+        <select id="select-dataset">
+          <!-- The options will be added dynamically in JavaScript -->
+        </select>
+        <button onclick="confirmCreateSchema()">Create</button>
+      </div>
+    </div>
 
     <script>
       // Set default values
@@ -88,8 +94,9 @@
       var defaultPrediction = "Display for the model prediction";
       var defaultLabel = "Display for the true label";
       
-      // Get the data from the hidden div element and parse it into a JavaScript object
-      var data = JSON.parse(document.getElementById('data').textContent);
+      // Initialize data and dataset name
+      var datasetName = ""
+      var dataset = [];
 
       // Store the initial value of datainput in a JavaScript variable
       var defaultDataInput = document.querySelector('.input-preview h3').textContent;
@@ -145,48 +152,51 @@
           }
         } 
 
-        // Get the nested list from data that has the same first value as selected error example
-        var nestedList = data.find(function(list) {
-          return list[0] === error;
+        // Find the error object in the dataset
+        var errorObject = dataset.find(function(error) {
+            return error.id === errorId;
         });
 
-        // Get all values of the nested list
-        var prediction = nestedList[1];
-        var prediction_dev = nestedList[2];
-        var label = nestedList[3];
-        var label_dev = nestedList[4];
-        var full_input = nestedList[nestedList.length - 1];
+        if (errorObject && isSelected) {
+          // Clear the prediction and label lists
+          var predictionList = document.getElementById('prediction-list');
+          while (predictionList.firstChild) {
+              predictionList.removeChild(predictionList.firstChild);
+          }
+          var labelList = document.getElementById('label-list');
+          while (labelList.firstChild) {
+              labelList.removeChild(labelList.firstChild);
+          }
 
-        // Populate all fields with respected values of the nested list
-        var textBox = document.getElementById('prediction');
-        textBox.textContent = prediction;
-        var textBox = document.getElementById('prediction-dev');
-        textBox.textContent = prediction_dev;
-        var textBox = document.getElementById('label');
-        textBox.textContent = label;
-        var textBox = document.getElementById('label-dev');
-        textBox.textContent = label_dev;
-        var textBox = document.getElementById('full-input');
-        textBox.textContent = full_input;
-        var textBox = document.getElementById('entry');
-        textBox.textContent = error;
-        
-        if(!isSelected){
+          // Populate all fields with the values from the error object
+          document.getElementById('full-input').textContent = errorObject.text;
+          document.getElementById('entry').textContent = errorObject.id;
+
+          // Populate the prediction and label lists with the values from the error object
+          errorObject.prediction.forEach(function(prediction) {
+              var predictionItem = document.createElement('li');
+              predictionItem.textContent = prediction.join(' ');
+              predictionList.appendChild(predictionItem);
+          });
+          errorObject.label.forEach(function(label) {
+              var labelItem = document.createElement('li');
+              labelItem.textContent = label.join(' ');
+              labelList.appendChild(labelItem);
+          });
+
+          // Hide the default text
+          document.getElementById('prediction-default').style.display = 'none';
+          document.getElementById('label-default').style.display = 'none';
+        } else {
           // Set default values
-          var textBox = document.getElementById('prediction');
-          textBox.textContent = defaultPrediction;
-          var textBox = document.getElementById('label');
-          textBox.textContent = defaultLabel;
-          var textBox = document.getElementById('entry');
-          textBox.textContent = defaultEntry;
+          document.getElementById('entry').textContent = defaultEntry;
+          document.getElementById('prediction-default').textContent = defaultPrediction;
+          document.getElementById('prediction-default').style.display = 'block';
+          document.getElementById('label-default').textContent = defaultLabel;
+          document.getElementById('label-default').style.display = 'block';
 
           // Clear other fields
-          var textBox = document.getElementById('prediction-dev');
-          textBox.textContent = "";
-          var textBox = document.getElementById('label-dev');
-          textBox.textContent = "";
-          var textBox = document.getElementById('full-input');
-          textBox.textContent = "";
+          document.getElementById('full-input').textContent = "";
         }
         
         reloadValues();
@@ -315,6 +325,30 @@
       }
 
       function createSchema(inputValue){
+        // Fetch the dataset names
+        fetch('/get-dataset-names')
+        .then(response => response.json())
+        .then(datasetNames => {
+          // Populate the select element with the dataset names
+          var selectDataset = document.getElementById('select-dataset');
+          while (selectDataset.firstChild) {
+            selectDataset.removeChild(selectDataset.firstChild);
+          }
+          datasetNames.forEach(function(datasetName) {
+            var option = document.createElement('option');
+            option.value = datasetName;
+            option.textContent = datasetName;
+            selectDataset.appendChild(option);
+          });
+
+          // Display the modal
+          var modal = document.getElementById('saveSchemaModal');
+          modal.style.display = 'block';
+        })
+        .catch(error => console.error(error));
+      }
+
+      function confirmCreateSchema() {
         var selectSchema = document.getElementById("select-schema");
 
         // If inputValue is empty or already exists in the list, return
@@ -331,19 +365,21 @@
         newOption = document.createElement("option");
         newOption.textContent = inputValue;
 
-        // Check if schema_list is empty
-        schema_list_empty_flag = false;
-        if (listItems.length === 1 && listItems[0].textContent === 'No schemas available') {
-          schema_list_empty_flag = true;
-        }
-
-        // If schema_list was empty, select the new option
-        if (schema_list_empty_flag) {
-          newOption.setAttribute('selected', 'selected');
-        }
+        // Make the new option the selected option
+        newOption.setAttribute('selected', 'selected');
 
         // Add the new option for the select element
         selectSchema.appendChild(newOption);
+
+        // Set values in preparation for the saveSchema function
+        datasetName = document.getElementById('select-dataset').value;
+        selectedCombinations = [];
+
+        // Save the schema
+        saveSchema();
+
+        // Dispatch a change event to the select element
+        selectSchema.dispatchEvent(new Event('change'));
 
         // If the select element contains the default option, remove it
         var defaultOption = selectSchema.querySelector('option[value=""]');
@@ -353,6 +389,15 @@
 
         // Clear the input field
         document.getElementById('create-input').value = '';
+
+        // Close the modal
+        var modal = document.getElementById('saveSchemaModal');
+        modal.style.display = 'none';
+      }
+
+      document.getElementsByClassName('close')[0].onclick = function() {
+        var modal = document.getElementById('saveSchemaModal');
+        modal.style.display = 'none';
       }
 
       function saveSchema(){
@@ -362,7 +407,8 @@
         // Add the selected schema to selectedCombinations
         var dataToSend = {
           selectedSchema: selectedSchema,
-          combinations: selectedCombinations
+          combinations: selectedCombinations,
+          dataset: datasetName
         };
 
         // Convert dataToSend to JSON
@@ -392,8 +438,9 @@
         fetch(`/get-schema/${schema}`)
         .then(response => response.json())
         .then(data => {
-          // Write the schema content into selectedCombinations
-          selectedCombinations = data;
+          // Write the schema content into corresponding values
+          selectedCombinations = data.combinations;
+          datasetName = data.dataset;
           
           // Update the display of selected combinations
           updateSelectedCombinationsDisplay();
@@ -431,6 +478,50 @@
             });
 
             categoryList.appendChild(newListItem);
+          });
+
+          fetch(`/get-dataset/${datasetName}`)
+          .then(response => response.json())
+          .then(data => {
+            // Store the data in a global variable
+            dataset = data;
+
+            // Show the default text if the dataset is empty
+            var defaultText = document.getElementById('default-text');
+            if (data.length === 0) {
+                defaultText.style.display = 'block';
+            } else {
+                defaultText.style.display = 'none';
+            }
+
+            // Clear the error example list
+            var errorExampleList = document.getElementById('error-example-list');
+            while (errorExampleList.firstChild) {
+                errorExampleList.removeChild(errorExampleList.firstChild);
+            }
+
+            // Populate the error example list with the errors from the dataset
+            data.forEach(function(error) {
+                var newListItem = document.createElement('li');
+                newListItem.onclick = function() { selectError(error.id); };
+
+                var errorTextSpan = document.createElement('span');
+                errorTextSpan.classList.add('error-text');
+                errorTextSpan.textContent = error;
+
+                var checkmarkSpan = document.createElement('span');
+                checkmarkSpan.classList.add('checkmark');
+
+                newListItem.appendChild(errorTextSpan);
+                newListItem.appendChild(checkmarkSpan);
+
+                errorExampleList.appendChild(newListItem);
+            });
+
+          })
+          .catch(error => {
+            // Handle the error
+            console.error('Error:', error);
           });
 
           reloadValues();
