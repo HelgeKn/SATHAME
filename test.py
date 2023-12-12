@@ -7,9 +7,9 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trai
 
 # print(tokenizer("Hello world!"))
 
-dataset_path = r"D:\ThesisRepo\SATHAME\static\datasets\SemEval\wsd_sentence.txt"
+dataset_path = r"D:\ThesisRepo\SATHAME\static\datasets\BEA2019\BEA2019.txt"
 try:
-    with open(dataset_path, 'r') as file:
+    with open(dataset_path, 'r', encoding='utf-8') as file:
         data = file.read()
     
     # Parse the data

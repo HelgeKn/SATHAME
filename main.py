@@ -12,7 +12,7 @@ def home():
     schema_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'schemas')
     schema_list = [os.path.splitext(f)[0] for f in os.listdir(schema_dir) if os.path.isfile(os.path.join(schema_dir, f))]
     
-    return render_template("index.html", contenta="SemEval", contentb="Error schema", datainput="Data entry", prediction="Prediction", truelabel="Label", schema_list = schema_list)
+    return render_template("index.html", contenta="Dataset", contentb="Error schema", datainput="Data entry", prediction="Prediction", truelabel="Label", schema_list = schema_list)
 
 @app.route('/save-schema', methods=['POST'])
 def handle_post():
@@ -55,7 +55,7 @@ def get_dataset_names():
 def get_dataset(dataset_name):
     dataset_path = os.path.join(os.path.dirname(__file__), 'static/datasets', dataset_name, f'{dataset_name}.txt')
     try:
-        with open(dataset_path, 'r') as file:
+        with open(dataset_path, 'r', encoding='utf-8') as file:
             data = file.read()
         
         # Parse the data

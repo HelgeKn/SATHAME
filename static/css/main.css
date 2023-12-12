@@ -1,209 +1,248 @@
 body {
-    height: 100vh;
-    margin: 0;
-    padding: 0;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    color: #000000;
-    background-color: #f0e8e8;
-  }
-  * {
-    box-sizing: border-box;
-  }
-  /*
-   * Formatting the header area
-   */
-  header {
-    background-color: #87bcdf;
-    height: 35px;
-    width: 100%;
-    opacity: .9;
-    margin-bottom: 10px;
-  }
-  header h1.logo {
-    margin: 0;
-    font-size: 1.7em;
-    color: #fff;
-    text-transform: uppercase;
-    float: left;
-  }
-  header h1.logo:hover {
-    color: #fff;
-    text-decoration: none;
-  }
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: #000000;
+  background-color: #f0e8e8;
+}
+* {
+  box-sizing: border-box;
+}
 
-  /*
-   * Centering the body content
-   */
-  .container {
-    width: 98%;
-    margin: 0 auto;
-    background-color: #fff;
-  }
-  .container-left-list {
-    border-radius: 10px;
-    width: 15%;
-    height: 93%;
-    margin-right: 1%;
-    margin-left: 1%;
-    float: left;
-    background-color: #fff;
-  }
-  .container-left-list.scrollable-list {
-    width: 90%;
-    height: 83%;
-    margin-left: 5%;
-    overflow-y: auto;
-  }
-  .selected {
-    background-color: #ddd;
-  }
-  #dataset-statistics{
-    padding-bottom: 10px;
-  }
+/*
+  * Formatting the header area
+  */
+header {
+  background-color: #87bcdf;
+  height: 35px;
+  width: 100%;
+  opacity: .9;
+  margin-bottom: 10px;
+}
+header h1.logo {
+  margin: 0;
+  font-size: 1.7em;
+  color: #fff;
+  text-transform: uppercase;
+  float: left;
+}
+header h1.logo:hover {
+  color: #fff;
+  text-decoration: none;
+}
 
-  .container-right-list {
-    border-radius: 10px;
-    width: 15%;
-    height: 93%;
-    float: right;
-    margin-right: 1%;
-    margin-left: 1%;
-    background-color: #fff;
-  }
-  #schema-dialog {
-    margin-bottom: 20px;
-  }
-  #schema-dialog select {
-    width: 120px;
-  }
-  #create-dialog {
-    position: fixed;
-    bottom: 5%;
-    right: 2.5%;
-  }
-  #create-input {
-    text-align: center;
-    width: 220px;
-    margin-bottom: 10px;
-  }
+/*
+  * Centering the body content
+  */
+.container {
+  width: 98%;
+  margin: 0 auto;
+  background-color: #fff;
+}
+.container-left-list {
+  border-radius: 10px;
+  width: 15%;
+  height: 93%;
+  margin-right: 1%;
+  margin-left: 1%;
+  float: left;
+  background-color: #fff;
+}
+.container-left-list.scrollable-list {
+  width: 90%;
+  height: 83%;
+  margin-left: 5%;
+  overflow-y: auto;
+}
+.selected {
+  background-color: #ddd;
+}
+#dataset-statistics{
+  padding-bottom: 10px;
+}
 
-  #error-category-list .counter {
-    position: absolute;
-    right: 2%;
-  }
+.container-right-list {
+  border-radius: 10px;
+  width: 15%;
+  height: 93%;
+  float: right;
+  margin-right: 1%;
+  margin-left: 1%;
+  background-color: #fff;
+}
+#schema-dialog {
+  margin-bottom: 20px;
+}
+#schema-dialog select {
+  width: 120px;
+}
+#create-dialog {
+  position: fixed;
+  bottom: 5%;
+  right: 2.5%;
+}
+#create-input {
+  text-align: center;
+  width: 220px;
+  margin-bottom: 10px;
+}
 
-  .input-preview {
-    position: relative;
-    top: -20px;
-    border-radius: 10px;
-    width: 66%;
-    height: 50%;
-    margin: 0 auto;
-    background-color: #fff;
-  }
-  .input-preview h3 {
-    padding-top: 20px;
-  }
-  .input-preview div {
-    font-size: 1.3em;
-    padding-bottom: 20px;
-    margin-left: 10%;
-    margin-right: 10%;
-  }
+#error-category-list .counter {
+  position: absolute;
+  right: 2%;
+}
 
-  .label-frame {
-    position: relative;
-    top: -10px;
-    width: 66%;
-    height: 41.8%;
-    margin: 0 auto;
-  }
-  .label-frame div {
-    font-size: 1.1em;
-    padding-bottom: 20px;
-    top: 10%;
-  }
+.input-preview {
+  position: relative;
+  top: -20px;
+  border-radius: 10px;
+  width: 66%;
+  height: 50%;
+  margin: 0 auto;
+  background-color: #fff;
+}
+.input-preview h3 {
+  padding-top: 20px;
+}
+.input-preview div {
+  font-size: 1.3em;
+  padding-bottom: 20px;
+  margin-left: 10%;
+  margin-right: 10%;
+}
 
-  .prediction {
-    border-radius: 10px;
-    float: left;
-    height: 100%;
-    width: 49.3%;
-    background-color: #fff;
-  }
-  .prediction div {
-    margin-left: 10%;
-    margin-right: 10%;
-  }
+.label-frame {
+  position: relative;
+  top: -10px;
+  width: 66%;
+  height: 41.8%;
+  margin: 0 auto;
+}
+.label-frame div {
+  font-size: 1.1em;
+  padding-bottom: 20px;
+  top: 10%;
+}
 
-  .truelabel {
-    border-radius: 10px;
-    float: right;
-    height: 100%;
-    width: 49.3%;
-    background-color: #fff;
-  }
-  .truelabel div {
-    margin-left: 10%;
-    margin-right: 10%;
-  }
+.prediction {
+  border-radius: 10px;
+  float: left;
+  height: 100%;
+  width: 49.3%;
+  background-color: #fff;
+}
+.prediction div {
+  margin-left: 10%;
+  margin-right: 10%;
+}
 
-  div.home {
-    padding: 10px 0 30px 0;
-    background-color: #fff;
-    -webkit-border-radius: 6px;
-       -moz-border-radius: 6px;
-            border-radius: 6px;
-  }
-  h2 {
-    font-size: 3em;
-    margin-top: 40px;
-    text-align: center;
-    letter-spacing: -2px;
-  }
-  h3 {
-    font-size: 1.7em;
-    font-weight: 100;
-    margin-top: 30px;
-    text-align: center;
-    letter-spacing: -1px;
-    color: #000000;
-  }
-  div {
-    text-align: center;
-  }
-  .menu {
-    float: right;
-    align-items: center;
-  }
-  .menu li {
-    display: inline;
-    line-height: 35px;
-  }
-  .menu li:hover{
-    background-color: #87bcdf;
-    line-height: 35px;
-  }
-  .menu li + li {
-    margin-left: 35px;
-  }
-  .menu li a {
-    color: #444;
-    text-decoration: none;
-  }
-  .menu li a:hover {
-    font-weight: bold;
-  }
-  ul {
-    list-style-type: none; /* Removes the bullet points */
-    padding: 0;
-    margin: 0;
-  }
-  li {
-    text-align: center;
-    padding: 15px 0; /* Adds space above and below each list item */
-    cursor: pointer; /* Changes the cursor when hovering over a list item */
-  }
-  li:hover {
-    background-color: #ddd; /* Changes the background color when hovering over a list item */
-  }
+.truelabel {
+  border-radius: 10px;
+  float: right;
+  height: 100%;
+  width: 49.3%;
+  background-color: #fff;
+}
+.truelabel div {
+  margin-left: 10%;
+  margin-right: 10%;
+}
+#prediction-list, #label-list {
+  width: 100%; 
+  height: 80%; 
+  overflow-y: auto; 
+  user-select: none; 
+  /* border: 1px solid #ccc; */ /* Add border to check */
+  padding: 10px; 
+}
+
+div.home {
+  padding: 10px 0 30px 0;
+  background-color: #fff;
+  -webkit-border-radius: 6px;
+      -moz-border-radius: 6px;
+          border-radius: 6px;
+}
+h2 {
+  font-size: 3em;
+  margin-top: 40px;
+  text-align: center;
+  letter-spacing: -2px;
+}
+h3 {
+  font-size: 1.7em;
+  font-weight: 100;
+  margin-top: 30px;
+  text-align: center;
+  letter-spacing: -1px;
+  color: #000000;
+}
+div {
+  text-align: center;
+}
+.menu {
+  float: right;
+  align-items: center;
+}
+.menu li {
+  display: inline;
+  line-height: 35px;
+}
+.menu li:hover{
+  background-color: #87bcdf;
+  line-height: 35px;
+}
+.menu li + li {
+  margin-left: 35px;
+}
+.menu li a {
+  color: #444;
+  text-decoration: none;
+}
+.menu li a:hover {
+  font-weight: bold;
+}
+ul {
+  list-style-type: none; /* Removes the bullet points */
+  padding: 0;
+  margin: 0;
+}
+li {
+  text-align: center;
+  padding: 15px 0; /* Adds space above and below each list item */
+  cursor: pointer; /* Changes the cursor when hovering over a list item */
+}
+li:hover {
+  background-color: #ddd; /* Changes the background color when hovering over a list item */
+}
+
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 30%; /* Could be more or less, depending on screen size */
+}
+
+.close {
+  color: #fff;
+  float: right;
+  font-size: 18px;
+  font-weight: bold;
+  background-color: red;
+  padding: 0 10px;
+  cursor: pointer;
+}

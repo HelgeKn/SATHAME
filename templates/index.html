@@ -18,7 +18,7 @@
     </header>
     <div class="container-left-list">
         {% block contenta %}
-        <h3>{{contenta}}</h3>
+        <h3 id="dataset-name">Dataset</h3>
         <div id="dataset-statistics"></div>
         <ul id="error-example-list" class="container-left-list scrollable-list">
           <!-- The list items will be added dynamically in JavaScript -->
@@ -63,15 +63,15 @@
         <div class="prediction">
             {% block prediction %}
             <h3>{{prediction}}</h3>
+            <p id="default-prediction-text" style="display: block;"></p>
             <ul id="prediction-list"></ul>
-            <p id="default-error-list-text" style="display: block;"></p>
             {% endblock %}
         </div>
         <div class="truelabel">
             {% block truelabel %}
             <h3>{{truelabel}}</h3>
+            <p id="default-label-text" style="display: block;"></p>
             <ul id="label-list"></ul>
-            <p id="default-error-list-text" style="display: block;"></p>
             {% endblock %}
         </div>
     </div>
@@ -80,11 +80,11 @@
     <div id="saveSchemaModal" class="modal">
       <div class="modal-content">
         <span class="close">&times;</span>
-        <h2>Select a Dataset</h2>
+        <h3>Select a Dataset</h3>
         <select id="select-dataset">
           <!-- The options will be added dynamically in JavaScript -->
         </select>
-        <button onclick="confirmCreateSchema()">Create</button>
+        <button onclick="confirmCreateSchema(document.getElementById('create-input').value)">Confirm</button>
       </div>
     </div>
 
@@ -153,8 +153,8 @@
         } 
 
         // Find the error object in the dataset
-        var errorObject = dataset.find(function(error) {
-            return error.id === errorId;
+        var errorObject = dataset.find(function(row) {
+            return row.id === error;
         });
 
         if (errorObject && isSelected) {
@@ -185,15 +185,15 @@
           });
 
           // Hide the default text
-          document.getElementById('prediction-default').style.display = 'none';
-          document.getElementById('label-default').style.display = 'none';
+          document.getElementById('default-prediction-text').style.display = 'none';
+          document.getElementById('default-label-text').style.display = 'none';
         } else {
           // Set default values
           document.getElementById('entry').textContent = defaultEntry;
-          document.getElementById('prediction-default').textContent = defaultPrediction;
-          document.getElementById('prediction-default').style.display = 'block';
-          document.getElementById('label-default').textContent = defaultLabel;
-          document.getElementById('label-default').style.display = 'block';
+          document.getElementById('default-prediction-text').textContent = defaultPrediction;
+          document.getElementById('default-prediction-text').style.display = 'block';
+          document.getElementById('default-label-text').textContent = defaultLabel;
+          document.getElementById('default-label-text').style.display = 'block';
 
           // Clear other fields
           document.getElementById('full-input').textContent = "";
@@ -260,8 +260,8 @@
               if (!combinationExists) {
                 selectedCombinations.push({ error: selectedError.textContent, category: category });
 
-                // Precombine all identical errors with the same category
-                updateForRelatedErrors(selectedError.textContent, category);
+                // Precombine all identical errors with the same category - broken due to changed dataset
+                // updateForRelatedErrors(selectedError.textContent, category);
 
                 // Update the display of selected combinations
                 updateSelectedCombinationsDisplay();
@@ -348,7 +348,7 @@
         .catch(error => console.error(error));
       }
 
-      function confirmCreateSchema() {
+      function confirmCreateSchema(inputValue) {
         var selectSchema = document.getElementById("select-schema");
 
         // If inputValue is empty or already exists in the list, return
@@ -403,6 +403,10 @@
       function saveSchema(){
         // Get the currently selected schema
         var selectedSchema = document.getElementById('select-schema').value;
+
+        console.log(selectedSchema);
+        console.log(selectedCombinations);
+        console.log(datasetName);
 
         // Add the selected schema to selectedCombinations
         var dataToSend = {
@@ -484,14 +488,17 @@
           .then(response => response.json())
           .then(data => {
             // Store the data in a global variable
-            dataset = data;
+            dataset = data.data;
 
             // Show the default text if the dataset is empty
-            var defaultText = document.getElementById('default-text');
+            var defaultText = document.getElementById('default-error-list-text');
+            var defaultDatasetName = document.getElementById('dataset-name');
             if (data.length === 0) {
                 defaultText.style.display = 'block';
+                defaultDatasetName.textContent = 'Dataset';
             } else {
                 defaultText.style.display = 'none';
+                defaultDatasetName.textContent = datasetName;
             }
 
             // Clear the error example list
@@ -501,30 +508,31 @@
             }
 
             // Populate the error example list with the errors from the dataset
-            data.forEach(function(error) {
+            dataset.forEach(function(error) {
                 var newListItem = document.createElement('li');
-                newListItem.onclick = function() { selectError(error.id); };
 
                 var errorTextSpan = document.createElement('span');
                 errorTextSpan.classList.add('error-text');
-                errorTextSpan.textContent = error;
+                errorTextSpan.textContent = error.id;
 
                 var checkmarkSpan = document.createElement('span');
                 checkmarkSpan.classList.add('checkmark');
 
                 newListItem.appendChild(errorTextSpan);
                 newListItem.appendChild(checkmarkSpan);
+                
+                newListItem.onclick = function() { selectError(errorTextSpan.textContent); };
 
                 errorExampleList.appendChild(newListItem);
             });
 
+            // Reload the values
+            reloadValues();
           })
           .catch(error => {
             // Handle the error
             console.error('Error:', error);
           });
-
-          reloadValues();
         })
         .catch(error => {
           // Handle the error
@@ -552,7 +560,7 @@
         });
 
         // Update the dataset statistics
-        var count = Object.keys(data).length;
+        var count = dataset.length;
 
         var datasetStatisticsElement = document.getElementById('dataset-statistics');
         datasetStatisticsElement.textContent = ` ${count} Errors | ${countChecks} Categorized`;
@@ -573,8 +581,8 @@
         console.log(thisError, thisCategory);
 
         // Select data row for selected error
-        var nestedList = data.find(function(list) {
-          return list[0] === thisError;
+        var nestedList = dataset.find(function(row) {
+          return row.id === thisError;
         });
 
         // Get prediction and label for the selected error
@@ -626,11 +634,11 @@
 
       window.onload = function() {
         // Populate all fields with default values
-        var textBox = document.getElementById('prediction');
+        var textBox = document.getElementById('default-prediction-text');
         textBox.textContent = defaultPrediction;
         var textBox = document.getElementById('entry');
         textBox.textContent = defaultEntry;
-        var textBox = document.getElementById('label');
+        var textBox = document.getElementById('default-label-text');
         textBox.textContent = defaultLabel;
 
         var selectSchema = document.getElementById('select-schema');
