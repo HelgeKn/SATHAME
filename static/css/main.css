@@ -5,6 +5,7 @@ body {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   color: #000000;
   background-color: #f0e8e8;
+  overflow-y: hidden;
 }
 * {
   box-sizing: border-box;
@@ -88,9 +89,19 @@ header h1.logo:hover {
   margin-bottom: 10px;
 }
 
-#error-category-list .counter {
-  position: absolute;
-  right: 2%;
+#error-category-list {
+  height: 74%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+#error-category-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 10px 20px;
 }
 
 .input-preview {
@@ -155,6 +166,12 @@ header h1.logo:hover {
   user-select: none; 
   /* border: 1px solid #ccc; */ /* Add border to check */
   padding: 10px; 
+}
+#prediction-list::selection, #label-list::selection {
+  background: none;
+}
+#prediction-list::-moz-selection, #label-list::-moz-selection {
+  background: none;
 }
 
 div.home {
