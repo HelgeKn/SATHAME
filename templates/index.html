@@ -20,6 +20,10 @@
         {% block contenta %}
         <h3 id="dataset-name">Dataset</h3>
         <div id="dataset-statistics"></div>
+        <div id="search-and-filter"> <!-- TODO implement functionality-->
+          <input id="search-input" type="text" placeholder="Search..">
+          <button id="filter-button" onclick="openFilterOptions()">&#x1F50D;</button>
+        </div>
         <ul id="error-example-list" class="container-left-list scrollable-list">
           <!-- The list items will be added dynamically in JavaScript -->
         </ul>
