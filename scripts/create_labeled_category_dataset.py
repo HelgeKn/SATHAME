@@ -1,8 +1,30 @@
 import json
+import random
 
-path_to_data = r"D:\ThesisRepo\SATHAME\static\datasets\SemEval\wsd.txt"
+def create_json(category_samples, data_list, category_to_number):
+    # Create an empty list to store the dictionaries
+    json_list = []
 
-path_to_categories = r"D:\ThesisRepo\SATHAME\static\embeddings\wsd_gold.json"
+    # Iterate over category_samples
+    for category_sample in category_samples:
+        # Create a dictionary for each sample
+        sample_dict = {
+            "id": category_sample['error'],
+            "text": next((data[1] for data in data_list if data[0] == category_sample['error']), None).rstrip('\n'),
+            "label": category_to_number[category_sample['category']]
+        }
+        
+        # Append the dictionary to the list
+        json_list.append(sample_dict)
+
+    # Convert the list to a JSON string
+    json_string = json.dumps(json_list)
+
+    return json_string
+
+path_to_data = r"D:\ThesisRepo\SATHAME\static\datasets\SemEval\SemEval.txt"
+
+path_to_categories = r"D:\ThesisRepo\SATHAME\static\schemas\SemEval_Gold.json"
 
 data_list=[]
 with open(path_to_data, "r") as file:
@@ -20,55 +42,34 @@ file.close()
 
 category_list=[]
 with open(path_to_categories, "r") as file:
-    category_list = json.load(file)
+    data = json.load(file)
+    category_list = data['combinations']
 
-count_category = 0
-for entry in category_list:
-    if entry['category'] == 'Inside Context':
-        count_category += 1
+# Create a set of unique errors
+unique_categories = set(entry['category'] for entry in category_list)
 
-labeled_category_dataset_training = []
-labeled_num = 0
-unlabeled_num = 0
+# Create a dictionary where the keys are the unique errors and the values are the unique numbers
+category_to_number = {category: number for number, category in enumerate(unique_categories)}
 
-for entry in category_list:
-    if labeled_num == 8 and unlabeled_num == 8:
-        break
-    match = None
-    for data in data_list:
-        if entry['error'] in data:
-            match = data
-            break
-    if match and not any(match[1] == sublist[1] for sublist in labeled_category_dataset_training):
-        if entry['category'] == 'Inside Context':
-            if labeled_num < 8:
-                labeled_category_dataset_training.append([match[0], match[1], 1])
-                labeled_num += 1
-        else:
-            if unlabeled_num < 8:
-                labeled_category_dataset_training.append([match[0], match[1], 0])
-                unlabeled_num += 1
+category_samples = []
+for category in unique_categories:
+    # Select 10 random entries for this category
+    samples = random.sample([entry for entry in category_list if entry['category'] == category], 10)
+    
+    # Add the samples to the list
+    category_samples.extend(samples)
+    
+    # Remove the selected samples from category_list
+    category_list = [entry for entry in category_list if entry not in samples]
 
-labeled_category_dataset = []
+train_json = create_json(category_samples, data_list, category_to_number)
 
-for entry in category_list:
-    match = None
-    for data in data_list:
-        if entry['error'] in data:
-            match = data
-            break
-    if match and not any(match[1] == sublist[1] for sublist in labeled_category_dataset_training) and not any(match[1] == sublist[1] for sublist in labeled_category_dataset):
-        if entry['category'] == 'Inside Context':
-            labeled_category_dataset.append([match[0], match[1], 1])
-        else:
-            labeled_category_dataset.append([match[0], match[1], 0])
+val_json = create_json(category_list, data_list, category_to_number)
 
-# Convert labeled_category_dataset to a list of dictionaries
-labeled_category_dataset_val_dicts = [{'id': item[0], 'text': item[1], 'label': item[2]} for item in labeled_category_dataset]
-labeled_category_dataset_train_dicts = [{'id': item[0], 'text': item[1], 'label': item[2]} for item in labeled_category_dataset_training]
-
-# Write the list of dictionaries to a JSON file
+# Save train_json to a file
 with open('train.json', 'w') as file:
-    json.dump(labeled_category_dataset_train_dicts, file) 
+    file.write(train_json)
+
+# Save val_json to a file
 with open('validation.json', 'w') as file:
-    json.dump(labeled_category_dataset_val_dicts, file)    
+    file.write(val_json)
