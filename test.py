@@ -1,29 +1,29 @@
 import transformers
 import json
 
-schema_path = r"D:\ThesisRepo\SATHAME\static\schemas\BEA2019_Gold.json"
+schema_path = r"D:\ThesisRepo\SATHAME\static\schemas\Swag_Gold.json"
 
 with open(schema_path, 'r') as file:
     data = json.load(file)
 
 consolidated_combinations = []
 for combination in data['combinations']:
-    if combination['category'] == 'unclear':
-        consolidated_combinations.append({'category': 'wording', 'error': combination['error']})
-    elif combination['category'] == 'pronoun':
-        consolidated_combinations.append({'category': 'preposition', 'error': combination['error']})
-    elif combination['category'] == 'capital':
-        consolidated_combinations.append({'category': 'spelling', 'error': combination['error']})
-    elif combination['category'] == 'deletions':
-        consolidated_combinations.append({'category': 'wording', 'error': combination['error']})
-    elif combination['category'] == 'article':
-        consolidated_combinations.append({'category': 'preposition', 'error': combination['error']})
+    if combination['category'] == 'EZ-DF-EZ-UF-NoS':
+        consolidated_combinations.append({'category': 'EZ-DF-EZ-DF-NoS', 'error': combination['error']})
+    elif combination['category'] == 'EZ-UF-EZ-UF-NoS':
+        consolidated_combinations.append({'category': 'EZ-UF-EZ-UF-Swap', 'error': combination['error']})
+    elif combination['category'] in ['MZ-UF-MZ-UF-Swap', 'MZ-UF-MZ-UF-NoS', 'MZ-DF-MZ-DF-NoS', 'MZ-DF-MZ-DF-Swap', 'MZ-UF-MZ-DF-NoS', 'MZ-UF-MZ-DF-Swap', 'MZ-DF-MZ-UF-Swap']:
+        consolidated_combinations.append({'category': 'MZ-MZ-NoS', 'error': combination['error']})
+    elif combination['category'] in ['EZ-UF-MZ-DF-Swap', 'EZ-DF-MZ-DF-Swap', 'EZ-DF-MZ-UF-Swap', 'EZ-UF-MZ-UF-Swap']:
+        consolidated_combinations.append({'category': 'EZ-MZ-Swap', 'error': combination['error']})
+    elif combination['category'] in ['MZ-DF-EZ-UF-Swap', 'MZ-UF-EZ-DF-Swap', 'MZ-UF-EZ-UF-Swap', 'MZ-DF-EZ-DF-Swap']:
+        consolidated_combinations.append({'category': 'MZ-EZ-Swap', 'error': combination['error']})
     else:
         consolidated_combinations.append(combination)
 
 data['combinations'] = consolidated_combinations
 
-with open("BEA2019_Gold_Consolidated.json", 'w') as file:
+with open("Swag_Gold_Consolidated.json", 'w') as file:
     json.dump(data, file)
 
 # dataset_path = r"D:\ThesisRepo\SATHAME\static\datasets\BEA2019\BEA2019.txt"

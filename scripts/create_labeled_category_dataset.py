@@ -22,9 +22,9 @@ def create_json(category_samples, data_list, category_to_number):
 
     return json_string
 
-path_to_data = r"D:\ThesisRepo\SATHAME\static\datasets\BEA2019\BEA2019.txt"
+path_to_data = r"D:\ThesisRepo\SATHAME\static\datasets\Swag\Swag.txt"
 
-path_to_categories = r"D:\ThesisRepo\SATHAME\static\schemas\BEA2019_Gold_Consolidated.json"
+path_to_categories = r"D:\ThesisRepo\SATHAME\static\schemas\Swag_Gold_Consolidated.json"
 
 data_list=[]
 with open(path_to_data, "r", encoding="utf-8") as file:
@@ -54,7 +54,7 @@ category_to_number = {category: number for number, category in enumerate(unique_
 category_samples = []
 for category in unique_categories:
     # Select 10 random entries for this category
-    samples = random.sample([entry for entry in category_list if entry['category'] == category], 10)
+    samples = random.sample([entry for entry in category_list if entry['category'] == category], 20)
     
     # Add the samples to the list
     category_samples.extend(samples)
@@ -75,5 +75,5 @@ with open('validation.json', 'w') as file:
     file.write(val_json)
 
 # Save category_to_number to a file
-with open('SemEval_mapping.json', 'w') as file:
+with open('Swag_mapping.json', 'w') as file:
     json.dump(category_to_number, file)
