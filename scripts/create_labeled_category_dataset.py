@@ -22,12 +22,12 @@ def create_json(category_samples, data_list, category_to_number):
 
     return json_string
 
-path_to_data = r"D:\ThesisRepo\SATHAME\static\datasets\SemEval\SemEval.txt"
+path_to_data = r"D:\ThesisRepo\SATHAME\static\datasets\BEA2019\BEA2019.txt"
 
-path_to_categories = r"D:\ThesisRepo\SATHAME\static\schemas\SemEval_Gold.json"
+path_to_categories = r"D:\ThesisRepo\SATHAME\static\schemas\BEA2019_Gold_Consolidated.json"
 
 data_list=[]
-with open(path_to_data, "r") as file:
+with open(path_to_data, "r", encoding="utf-8") as file:
     # Read the file line by line
     for line in file:
         # Split the line contents into parts
@@ -73,3 +73,7 @@ with open('train.json', 'w') as file:
 # Save val_json to a file
 with open('validation.json', 'w') as file:
     file.write(val_json)
+
+# Save category_to_number to a file
+with open('SemEval_mapping.json', 'w') as file:
+    json.dump(category_to_number, file)

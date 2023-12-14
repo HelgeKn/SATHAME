@@ -11,7 +11,7 @@
         <strong><nav>
           <ul class="menu">
             <li><a href="{{ url_for('home') }}">Home</a></li>
-            <li><a href="{{ url_for('home') }}">Models</a></li>
+            <li><a href="#" id="modelsButton">Models</a></li>
           </ul>
         </nav></strong>
       </div>
@@ -92,11 +92,49 @@
       </div>
     </div>
 
+    <!-- The Models Modal -->
+    <div id="modelsModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3>Schema and Settings</h3>
+        <div id="setting">
+          <label style="display: block; margin-bottom: 20px;">
+            Select a schema:
+            <select id="select-model-schema">
+              {% if schema_list|length == 0 %}
+                <option disabled selected value="">No schemas available</option>  
+              {% else %}
+                {% for schema in schema_list %}
+                  <option value="{{ schema }}">{{ schema }}</option>
+                {% endfor %}
+              {% endif %}
+            </select>
+          </label>
+          <div>
+            <label for="saveModel" style="display: block; margin-bottom: 20px;">
+              <input type="checkbox" id="saveModel">
+              Upload model to Hugging Face
+            </label>
+          </div>
+          <div>
+            <button onclick="confirmGenerateSchema(document.getElementById('saveModel').checked, document.getElementById('select-model-schema').value)">Generate Schema</button>
+          </div>
+        </div>
+        <div id="generating">
+          <div id="loading" style="display: block; margin-bottom: 20px;">Generating schema</div>
+          <div>This process can take hours!</div>
+        </div>
+      </div>
+    </div>
+
     <script>
       // Set default values
       var defaultEntry = "Please select an error example";
       var defaultPrediction = "Display for the model prediction";
       var defaultLabel = "Display for the true label";
+
+      // Schema boolean
+      var generatorRunning = false;
       
       // Initialize data and dataset name
       var datasetName = ""
@@ -635,6 +673,59 @@
       function countOccurrences(value) {
         return selectedCombinations.filter(item => item.category === value).length;
       }
+
+      function confirmGenerateSchema(isChecked, selectedSchema) {
+        // TODO - your code here
+      }
+
+      // Function to update the visibility of the model modal based on generatorRunning
+      function updateDivVisibility() {
+        var settingDiv = document.getElementById('setting');
+        var generatingDiv = document.getElementById('generating');
+
+        if (generatorRunning) {
+          settingDiv.style.display = 'none';
+          generatingDiv.style.display = 'block';
+        } else {
+          settingDiv.style.display = 'block';
+          generatingDiv.style.display = 'none';
+        }
+      }
+
+      // Everything modal related
+      var modal1 = document.getElementById("saveSchemaModal");
+      var modal2 = document.getElementById("modelsModal");
+      var btn = document.getElementById("modelsButton");
+      var spans = document.getElementsByClassName("close");
+
+      btn.onclick = function() {
+        modal2.style.display = "block";
+        updateDivVisibility();
+      }
+
+      for(let i = 0; i < spans.length; i++){
+        spans[i].onclick = function() {
+          modal1.style.display = "none";
+          modal2.style.display = "none";
+        }
+      }
+
+      window.onclick = function(event) {
+        if (event.target == modal1) {
+          modal1.style.display = "none";
+        }
+        if (event.target == modal2) {
+          modal2.style.display = "none";
+        }
+      }
+
+      var loadingDiv = document.getElementById('loading');
+      var dots = 0;
+      setInterval(function() {
+        dots = (dots + 1) % 4;
+        var text = 'Generating schema' + '.'.repeat(dots);
+        loadingDiv.textContent = text;
+      }, 500);
 
       window.onload = function() {
         // Populate all fields with default values
