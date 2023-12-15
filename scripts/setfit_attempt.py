@@ -4,12 +4,12 @@ from sentence_transformers.losses import CosineSimilarityLoss
 from setfit import SetFitModel, SetFitTrainer, TrainingArguments, sample_dataset
 
 dataset_id = "HelgeKn/Swag_categories"
-classifier_id = "HelgeKn/Swag-multi-class-10"
+classifier_id = "HelgeKn/Swag-multi-class-4"
 model_id = "sentence-transformers/paraphrase-mpnet-base-v2"
 
 dataset = load_dataset(dataset_id)
 
-train_dataset = sample_dataset(dataset["train"], label_column="label", num_samples=10)
+train_dataset = sample_dataset(dataset["train"], label_column="label", num_samples=4)
 eval_dataset = dataset["validation"] 
 
 num_classes = len(train_dataset.unique("label"))
