@@ -10,7 +10,7 @@ You create some error categories and label a few errors for each category, and a
 A generated schema then indicates the following steps and areas that promise significant results worth your time.
 
 ## Features
-
+### SATHAME UI
 ![Example of SATHAME UI](static/images/SATHAME_Full_UI_Labeled.png?raw=true "SATHAME UI")
 
 1 - Name of the dataset - Number of entries - Number of categorized errors - Search the error list - Filter list by category
@@ -28,6 +28,16 @@ A generated schema then indicates the following steps and areas that promise sig
 7 - Error list containing the errors ids for all dataset entries
 
 "Models" - Top bar - optional dialog to trigger classifier fine-tuning from the tool UI
+
+### Scripts
+Editing schemas and labeling of errors is best done through the UI. However, the repository contains a range of scripts. 
+They can be found in the directory "scripts".
+
+Dataset formatting - Sets of prediction errors are consumed as txt files. A range of "error-example-extractor" scripts showcase conversions for three dataset examples.
+
+Fine-tuning a classification head - This project uses [SetFit](https://github.com/huggingface/setfit) and [Huggingface](https://huggingface.co) to fine-tune pretrained models and manage models / training data. Check out the "setfit_fine-tuning_classifier" script for more details.
+
+Results - The "statistics" script from the repository helps to calculate overall statistics like accuracy or category distribution for the fine-tuned models.
 
 ## Code Examples
 
