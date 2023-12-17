@@ -1,9 +1,14 @@
 from flask import Flask, render_template, request
 from schema_generator import generate_schema
+from rq.job import Job
+from rq.exceptions import NoSuchJobError
+from redis import Redis
 import os
 import json
 
 from flask.json import jsonify
+
+redis_conn = Redis()
 
 app = Flask(__name__)
 
@@ -20,7 +25,7 @@ def handle_post():
     data = request.get_json()
     selected_schema = data['selectedSchema']
     dataset = data['dataset']
-    json_file_path = f'static/schemas/{selected_schema}.json'
+    json_file_path = os.path.join('static','schemas', f'{selected_schema}.json')
 
     try:
         with open(json_file_path, 'w') as file:
@@ -35,7 +40,7 @@ def handle_post():
     
 @app.route('/get-schema/<schema>', methods=['GET'])
 def get_schema(schema):
-  json_file_path = f'static/schemas/{schema}.json'
+  json_file_path = os.path.join('static','schemas',f'{schema}.json')
   try:
     with open(json_file_path, 'r') as file:
       data = json.load(file)
@@ -45,7 +50,7 @@ def get_schema(schema):
   
 @app.route('/get-dataset-names', methods=['GET'])
 def get_dataset_names():
-    dataset_path = os.path.join(os.path.dirname(__file__), 'static/datasets')
+    dataset_path = os.path.join(os.path.dirname(__file__),'static','datasets')
     try:
         dataset_names = [name for name in os.listdir(dataset_path) if os.path.isdir(os.path.join(dataset_path, name))]
         return jsonify(dataset_names), 200
@@ -54,7 +59,7 @@ def get_dataset_names():
     
 @app.route('/get-dataset/<dataset_name>', methods=['GET'])
 def get_dataset(dataset_name):
-    dataset_path = os.path.join(os.path.dirname(__file__), 'static/datasets', dataset_name, f'{dataset_name}.txt')
+    dataset_path = os.path.join(os.path.dirname(__file__), 'static', 'datasets', dataset_name, f'{dataset_name}.txt')
     try:
         with open(dataset_path, 'r', encoding='utf-8') as file:
             data = file.read()
@@ -77,7 +82,7 @@ def get_dataset(dataset_name):
         return str(e), 500
     
 @app.route('/generate-schema', methods=['POST'])
-def generate_schema():
+def generate_schema_endpoint():
     data = request.get_json()
     isChecked = data.get('isChecked')
     selectedSchema = data.get('selectedSchema')
@@ -85,6 +90,23 @@ def generate_schema():
     job_id = generate_schema(isChecked, selectedSchema)
 
     return jsonify({'message': 'Schema generation started', 'job_id': job_id}), 200
+
+@app.route('/job-status', methods=['GET'])
+def job_status():
+    job_id = request.args.get('job_id')
+    if not job_id:
+        return jsonify({'error': 'Missing job_id parameter'}), 400
+
+    try:
+        job = Job.fetch(job_id, connection=redis_conn)
+        status = job.get_status()
+    except NoSuchJobError:
+        status = None
+
+    if status is None:
+        return jsonify({'error': 'Invalid job_id'}), 404
+
+    return jsonify({'job_id': job_id, 'status': status}), 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)

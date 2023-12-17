@@ -41,10 +41,10 @@ def create_json(category_samples, data_list, category_to_number):
 
 def train_model(isChecked, selectedSchema):
     # Get the current job
-    # job = get_current_job()
+    job = get_current_job()
 
     # Get the job ID
-    job_id = 'blub' # job.get_id() if job else None
+    job_id = job.get_id() if job else None
     
     schema_path = os.path.join('static','schemas', f'{selectedSchema}.json')
     with open(schema_path, 'r') as file:
@@ -95,7 +95,10 @@ def train_model(isChecked, selectedSchema):
         repo_type="dataset",
         token=huggingtoken,
     )
-    
+
+    with open (output_path, 'r') as file3:
+        train_json = json.load(file3)
+
     dataset = load_dataset(generator_repo)
 
     eval_dataset = sample_dataset(dataset["train"], label_column="label", num_samples=1)
@@ -178,14 +181,14 @@ def train_model(isChecked, selectedSchema):
 
     gen_schema_name = selectedSchema + '_Gen'
     schema_path = os.path.join('static','schemas', f'{gen_schema_name}.json')
-    with open("Swag_CaseStudy_Gen.json", 'w') as file7:
+    with open(schema_path, 'w') as file7:
         json.dump(schema, file7)
 
 def generate_schema(isChecked, selectedSchema):
     # This will add long_running_task to the queue and return immediately
-    # job = q.enqueue(train_model, isChecked, selectedSchema)
+    job = q.enqueue(train_model, isChecked, selectedSchema)
 
     train_model(isChecked, selectedSchema)
-    return # job.get_id()  # Returns the ID of the job
+    return job.get_id()  # Returns the ID of the job
 
-generate_schema(True, 'Testing')
+# generate_schema(True, 'Testing')

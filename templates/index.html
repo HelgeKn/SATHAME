@@ -629,6 +629,19 @@
           var counter = categoryItem.querySelector('.counter');
           counter.textContent = countOccurrences(category);
         });
+
+        // Check the status of the current job
+        if (currentJobId) {
+          fetch(`/job-status?job_id=${currentJobId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'finished') {
+                    // The job is done, do something here
+                    generatorRunning = false;
+                    currentJobId = null;
+                }
+            });
+        }
       }
       
       // Only used inside selectCategory on select, deselect and change
@@ -689,28 +702,29 @@
         return selectedCombinations.filter(item => item.category === value).length;
       }
 
+      currentJobId = null;
       // Trigger generator to create a schema with classifier
-      function confirmGenerateSchema(isChecked, selectedSchema) {
-        function confirmGenerateSchema(isChecked, selectedSchema) {
-          var url = '/generate-schema';
-          var data = { isChecked: isChecked, selectedSchema: selectedSchema };
 
-          fetch(url, {
-              method: 'POST', 
-              headers: {
-                  'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(data), 
-          })
-          .then(response => response.json())
-          .then(data => {
-              console.log('Success:', data);
-              generatorRunning = true;
-          })
-          .catch((error) => {
-              console.error('Error:', error);
-          });
-        }
+      function confirmGenerateSchema(isChecked, selectedSchema) {
+        var url = '/generate-schema';
+        var data = { isChecked: isChecked, selectedSchema: selectedSchema };
+
+        fetch(url, {
+            method: 'POST', 
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data), 
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Success:', data);
+            generatorRunning = true;
+            currentJobId = data.job_id;
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
       }
 
       // Function to update the visibility of the model modal based on generatorRunning
