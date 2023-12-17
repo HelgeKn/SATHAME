@@ -11,7 +11,23 @@ A generated schema then indicates the following steps and areas that promise sig
 
 ## Features
 
-![Example of SATHAME UI](static\images\SATHAME_Full_UI_Labeled.png?raw=true "SATHAME UI")
+![Example of SATHAME UI](static/images/SATHAME_Full_UI_Labeled.png?raw=true "SATHAME UI")
+
+1 - Name of the dataset - Number of entries - Number of categorized errors - Search the error list - Filter list by category
+
+2 - Display for the full text of each error of the list
+
+3 - Display for the predictions made by the original language model
+
+4 - Display for the gold labels for the dataset
+
+5 - Schema select box and list of error categories contained in the schema with error counter
+
+6 - Input field to create a new schema (requires a dataset selection on a modal) or category
+
+7 - Error list containing the errors ids for all dataset entries
+
+"Models" - Top bar - optional dialog to trigger classifier fine-tuning from the tool UI
 
 ## Code Examples
 
