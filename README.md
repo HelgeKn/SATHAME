@@ -40,8 +40,42 @@ Fine-tuning a classification head - This project uses [SetFit](https://github.co
 Results - The "statistics" script from the repository helps to calculate overall statistics like accuracy or category distribution for the fine-tuned models.
 
 ## Code Examples
+SATHAME was developed and tested on python 3.9+
+
+The schemas for error clustering are based on a json file with the following structure:
+``` python
+combinations = [{
+  'error' : errorID
+  'category' : selectedCategory
+}]
+
+schema = {
+    'combinations' : combinations,
+    'dataset' : datasetName
+}
+```
+Because of the older version of SetFit this project still includes the "SetFitTrainer". These are the default settings in the script and flask endpoint:
+``` python
+train_dataset = sample_dataset(dataset["train"], label_column="label", num_samples=4)
+eval_dataset = dataset["validation"] 
+
+num_classes = len(train_dataset.unique("label"))
+model = SetFitModel.from_pretrained(model_id, use_differentiable_head=True, head_params={"out_features": num_classes})
+
+trainer = SetFitTrainer(
+    model=model,
+    train_dataset=train_dataset,
+    eval_dataset=eval_dataset,
+    loss_class=CosineSimilarityLoss,
+    num_iterations=20,
+    num_epochs=2,
+    column_mapping={"text": "text", "label": "label"},
+)
+```
+To use the full capabilities and track all you work, this project recommends huggingface to training set and model tracking. SetFit harmonises well with they api and is the reason this project also adapted huggingface.
 
 ## Installation
+The project contains a [requirements.txt](requirements.txt) with specific versions of each python library used.
 
 ## Extension Guide
 
