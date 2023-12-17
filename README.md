@@ -11,7 +11,7 @@ A generated schema then indicates the following steps and areas that promise sig
 
 ## Features
 
-![Example of SATHAME UI](https://github.com/HelgeKn/SATHAME/tree/main/static/images/SATHAME_Full_UI-Labeled.png)
+![Example of SATHAME UI](static\images\SATHAME_Full_UI_Labeled.png?raw=true "SATHAME UI")
 
 ## Code Examples
 
