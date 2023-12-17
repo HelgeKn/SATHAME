@@ -41,20 +41,21 @@ def create_json(category_samples, data_list, category_to_number):
 
 def train_model(isChecked, selectedSchema):
     # Get the current job
-    job = get_current_job()
+    # job = get_current_job()
 
     # Get the job ID
-    job_id = job.get_id() if job else None
+    job_id = 'blub' # job.get_id() if job else None
     
-    schema_path = os.path.join('static','schemas', selectedSchema,'.json')
+    schema_path = os.path.join('static','schemas', f'{selectedSchema}.json')
     with open(schema_path, 'r') as file:
         schema = json.load(file)
     
     dataset_name = schema['dataset']
-    dataset_path = os.path.join('static', 'datasets', dataset_name, dataset_name + '.txt')
+    dataset_path = os.path.join('static', 'datasets', dataset_name, f'{dataset_name}.txt')
 
     data_list=[]
     text_list = []
+    full_ids = []
     with open(dataset_path, "r", encoding="utf-8") as file:
         # Read the file line by line
         for line in file:
@@ -65,6 +66,7 @@ def train_model(isChecked, selectedSchema):
             part2 = parts[-1]
             # Save the parts in the list as a group
             text_list.append(part2)
+            full_ids.append(part1)
             data_list.append([part1, part2])
     # Close the file
     file.close()
@@ -91,6 +93,7 @@ def train_model(isChecked, selectedSchema):
         path_in_repo="train.json",
         repo_id=generator_repo,
         repo_type="dataset",
+        token=huggingtoken,
     )
     
     dataset = load_dataset(generator_repo)
@@ -146,12 +149,43 @@ def train_model(isChecked, selectedSchema):
 
     prep = {'accuracy': accuracy, 'counts': category_dict}
     
-    gen_schema_name = selectedSchema + '_Gen'
-    gen_schema_path = os.path.join('static','schemas', gen_schema_name,'.json')
-    with open(gen_schema_path, 'w') as file5:
+    new_combinations = []
+
+    for sample in train_json:
+        category = next((combination["category"] for combination in category_list if combination["error"] == sample["id"]), None)
+        new_combination = {"error": sample["id"], "category": category}
+        new_combinations.append(new_combination)
+
+    gen_stats_name = selectedSchema + '_Gen_' + job_id
+    gen_stats_path = os.path.join('static','statistics',dataset_name, f'{gen_stats_name}.json')
+    with open(gen_stats_path, 'w') as file5:
         json.dump(prep, file5)
+
+    prediction_dict = []
+    category_dict = {}
+
+    for pred, full in zip(preds_np, full_ids):
+        if any(full == combination["error"] for combination in new_combinations):
+            category = next((combination["category"] for combination in new_combinations if combination["error"] == full), None)
+            prep = {'error': full, 'category': category}
+            prediction_dict.append(prep)
+        else:
+            key = next((k for k, v in category_to_number.items() if v == pred), None)
+            prep = {'error': full, 'category': key}
+            prediction_dict.append(prep)
+
+    schema['combinations'] = prediction_dict
+
+    gen_schema_name = selectedSchema + '_Gen'
+    schema_path = os.path.join('static','schemas', f'{gen_schema_name}.json')
+    with open("Swag_CaseStudy_Gen.json", 'w') as file7:
+        json.dump(schema, file7)
 
 def generate_schema(isChecked, selectedSchema):
     # This will add long_running_task to the queue and return immediately
-    job = q.enqueue(train_model, isChecked, selectedSchema)
-    return job.get_id()  # Returns the ID of the job
+    # job = q.enqueue(train_model, isChecked, selectedSchema)
+
+    train_model(isChecked, selectedSchema)
+    return # job.get_id()  # Returns the ID of the job
+
+generate_schema(True, 'Testing')
