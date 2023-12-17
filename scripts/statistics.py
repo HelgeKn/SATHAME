@@ -1,7 +1,12 @@
+import os
 import numpy as np
 import json
 from datasets import load_dataset
 from setfit import SetFitModel
+
+path_to_data = os.path.join('static','datasets','SemEval','SemEval.txt')
+path_to_schema = os.path.join('static','schemas','SemEval_Gold.json')
+classifier_id_base = "HelgeKn/SemEval-multi-class-"
 
 def create_dataset_statistics(path_to_data, classifier_id_base, path_to_schema):
     data_list=[]
@@ -26,12 +31,12 @@ def create_dataset_statistics(path_to_data, classifier_id_base, path_to_schema):
     # Close the file
     file2.close()
 
-    path_to_10mapping = r"D:\ThesisRepo\SATHAME\static\datasets\SemEval\10_example_set\SemEval_mapping.json"
+    path_to_10mapping = os.path.join('static','datasets','SemEval','10_example_set','SemEval_mapping.json')
     with open(path_to_10mapping, "r") as file3:
         data = json.load(file3)
         category_to_number = data
 
-    path_to_20mapping = r"D:\ThesisRepo\SATHAME\static\datasets\SemEval\20_example_set\SemEval_mapping.json"
+    path_to_20mapping = os.path.join('static','datasets','SemEval','20_example_set','SemEval_mapping.json')
     with open(path_to_20mapping, "r") as file4:
         data = json.load(file4)
         category_to_number_20 = data
@@ -69,7 +74,7 @@ def create_dataset_statistics(path_to_data, classifier_id_base, path_to_schema):
 
         prep = {'accuracy': accuracy, 'counts': category_dict}
         
-        path = f"SemEval_Stats_{i}.json"
+        path = f"Dataset_Stats_{i}.json"
         with open(path, 'w') as file5:
             json.dump(prep, file5)
     
@@ -106,13 +111,9 @@ def create_dataset_statistics(path_to_data, classifier_id_base, path_to_schema):
 
     prep = {'accuracy': accuracy, 'counts': category_dict}
     
-    with open("SemEval_Stats_20.json", 'w') as file5:
+    with open("Dataset_Stats_20.json", 'w') as file5:
         json.dump(prep, file5)
 
 
 # Main code
-path_to_data = r"D:\ThesisRepo\SATHAME\static\datasets\SemEval\SemEval.txt"
-path_to_schema = r"D:\ThesisRepo\SATHAME\static\schemas\SemEval_Gold.json"
-classifier_id_base = "HelgeKn/SemEval-multi-class-"
-
 create_dataset_statistics(path_to_data, classifier_id_base, path_to_schema)

@@ -1,4 +1,5 @@
 import json
+import os
 import random
 
 def create_json(category_samples, data_list, category_to_number):
@@ -22,9 +23,9 @@ def create_json(category_samples, data_list, category_to_number):
 
     return json_string
 
-path_to_data = r"D:\ThesisRepo\SATHAME\static\datasets\Swag\Swag.txt"
+path_to_data = os.path.join('static','datasets','Swag','Swag.txt')
 
-path_to_categories = r"D:\ThesisRepo\SATHAME\static\schemas\Swag_Gold_Consolidated.json"
+path_to_categories = os.path.join('static','schemas','Swag_Gold_Consolidated.json')
 
 data_list=[]
 with open(path_to_data, "r", encoding="utf-8") as file:

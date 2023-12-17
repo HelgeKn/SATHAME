@@ -18,6 +18,7 @@ model_id = "sentence-transformers/paraphrase-mpnet-base-v2"
 huggingbase = "HelgeKn/"
 huggingtoken = "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"
 
+# Function to create a JSON string from a list of dictionaries
 def create_json(category_samples, data_list, category_to_number):
     # Create an empty list to store the dictionaries
     json_list = []
@@ -39,6 +40,7 @@ def create_json(category_samples, data_list, category_to_number):
 
     return json_string
 
+# Function to train the model, predict the categories, and generate the statistics and schema
 def train_model(isChecked, selectedSchema):
     # Get the current job
     job = get_current_job()
@@ -88,6 +90,7 @@ def train_model(isChecked, selectedSchema):
     with open(output_path, 'w') as file2:
         file2.write(train_json)
     
+    # Upload the file to the Hugging Face Hub
     api.upload_file(
         path_or_fileobj=output_path,
         path_in_repo="train.json",
@@ -99,14 +102,18 @@ def train_model(isChecked, selectedSchema):
     with open (output_path, 'r') as file3:
         train_json = json.load(file3)
 
+    # get dataset from huggingface hub
     dataset = load_dataset(generator_repo)
 
+    # prep data for training
     eval_dataset = sample_dataset(dataset["train"], label_column="label", num_samples=1)
     train_dataset = dataset["train"] 
 
+    # model settings and load pretrained model
     num_classes = len(train_dataset.unique("label"))
     model = SetFitModel.from_pretrained(model_id, use_differentiable_head=True, head_params={"out_features": num_classes})
 
+    # train parameters
     trainer = SetFitTrainer(
         model=model,
         train_dataset=train_dataset,
@@ -119,16 +126,19 @@ def train_model(isChecked, selectedSchema):
 
     trainer.train()
 
+    # upload model to huggingface hub - if selected in the UI
     if isChecked:
         classifier_id = huggingbase + selectedSchema + '-' + job_id
         trainer.push_to_hub(classifier_id, token=huggingtoken)
 
+    # get predictions and prepare for statistics
     preds = model(text_list)
     preds_np = preds.numpy()
 
     prediction_dict = {}
     category_dict = {}
 
+    # transform data for statistics and generated schema
     for pred, full in zip(preds_np, data_list):
         key = next((k for k, v in category_to_number.items() if v == pred), None)
         prediction_dict[full[0]] = key
@@ -142,6 +152,7 @@ def train_model(isChecked, selectedSchema):
 
     print(f"Accuracy for {job_id}: {accuracy}")
 
+    # get counts for statistics
     counts = np.bincount(preds_np)
 
     for count, key in zip(counts, category_to_number):
@@ -154,6 +165,7 @@ def train_model(isChecked, selectedSchema):
     
     new_combinations = []
 
+    # calculations for statistics file
     for sample in train_json:
         category = next((combination["category"] for combination in category_list if combination["error"] == sample["id"]), None)
         new_combination = {"error": sample["id"], "category": category}
@@ -167,6 +179,7 @@ def train_model(isChecked, selectedSchema):
     prediction_dict = []
     category_dict = {}
 
+    # preparing data for generated schema
     for pred, full in zip(preds_np, full_ids):
         if any(full == combination["error"] for combination in new_combinations):
             category = next((combination["category"] for combination in new_combinations if combination["error"] == full), None)

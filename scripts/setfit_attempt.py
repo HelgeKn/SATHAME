@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from datasets import load_dataset
 from sentence_transformers.losses import CosineSimilarityLoss
@@ -6,6 +7,7 @@ from setfit import SetFitModel, SetFitTrainer, TrainingArguments, sample_dataset
 dataset_id = "HelgeKn/Swag_categories"
 classifier_id = "HelgeKn/Swag-multi-class-4"
 model_id = "sentence-transformers/paraphrase-mpnet-base-v2"
+huggingtoken = "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"
 
 dataset = load_dataset(dataset_id)
 
@@ -30,9 +32,9 @@ trainer.train()
 metrics = trainer.evaluate()
 print(metrics) 
 
-trainer.push_to_hub(classifier_id, token="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")
+trainer.push_to_hub(classifier_id, token=huggingtoken)
 
-path_to_data = r"D:\ThesisRepo\SATHAME\static\datasets\Swag\Swag.txt"
+path_to_data = os.path.join('static','datasets','SemEval','SemEval.txt')
 data_list=[]
 with open(path_to_data, "r") as file:
     # Read the file line by line
