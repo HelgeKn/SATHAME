@@ -3,7 +3,15 @@ semi-automated tool helping analyse model errors - bachelor thesis HU Berlin
 
 ## Motivation
 
+Related work in error analysis for language models indicates few standards and best practices.
+The available tools lead many projects toward manual error analysis, which is time-consuming and tedious.
+This tool aims to provide a starting point for developers of any skill level. 
+You create some error categories and label a few errors for each category, and a sentence transformer combined with a classifier head does the rest.
+A generated schema then indicates the following steps and areas that promise significant results worth your time.
+
 ## Features
+
+![Example of SATHAME UI](https://github.com/HelgeKn/SATHAME/tree/main/static/images/SATHAME_Full_UI-Labeled.png)
 
 ## Code Examples
 
