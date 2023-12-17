@@ -54,7 +54,7 @@ schema = {
     'dataset' : datasetName
 }
 ```
-Because of the older version of SetFit this project still includes the "SetFitTrainer". These are the default settings in the script and flask endpoint:
+Because of the older version of SetFit this project still includes the "SetFitTrainer" instead of "Trainer". These are the default settings in the script and flask endpoint:
 ``` python
 train_dataset = sample_dataset(dataset["train"], label_column="label", num_samples=4)
 eval_dataset = dataset["validation"] 
@@ -72,14 +72,37 @@ trainer = SetFitTrainer(
     column_mapping={"text": "text", "label": "label"},
 )
 ```
-To use the full capabilities and track all you work, this project recommends huggingface to training set and model tracking. SetFit harmonises well with they api and is the reason this project also adapted huggingface.
+This project includes Hugging Face to unlock SATHAME's full capabilities and track all your work. Hugging Face is used explicitly for training sets and model tracking. SetFit harmonizes well with the API, so this project also adapted Hugging Face.
 
 ## Installation
 The project contains a [requirements.txt](requirements.txt) with specific versions of each python library used.
 
+``` sh
+﻿datasets
+Flask
+huggingface-hub
+redis
+sentence-transformers
+setfit
+transformers
+``` 
+Redis is only required if you want to trigger fine-tuning from the SATHAME UI to track the fine-tuning job and run it in the background.
+Ensure your Redis Server runs on the default port (localhost:6379) for the system to reach it.
+
+The "https://huggingface.co/HelgeKn" repository contains a testing dataset and room for models, but it is recommended to use your own.
+Adjust the "schema_generator.py" and the "setfit_fine-tuning_classifier.py" parameters to work with your huggingface repository.
+
+If you want to use the UI on your local device - navigate to the root of the repository, install requirements, and run:
+``` sh
+python main.py
+```
+
 ## Extension Guide
 
-## Results
+Check out the main.py and corresponding index.html or main.css to improve the UI or add custom functionality. These three files build the foundation for the Flask app.
+Example datasets and their corresponding schema are in the "static" directory. Flask has access to all files in that directory.
+
+The scripts should be received as an open invitation to customize them for your needs. Implementing more options into schemas to adjust hyperparameters could considerably improve usability.
 
 ## License
 Copyright [2023] [Helge Kneiske - Humboldt University Berlin]
