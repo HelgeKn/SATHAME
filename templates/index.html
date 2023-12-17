@@ -23,6 +23,11 @@
         <div id="search-and-filter"> <!-- TODO implement functionality-->
           <input id="search-input" type="text" placeholder="Search..">
           <button id="filter-button" onclick="openFilterOptions()">&#x1F50D;</button>
+          <div id="filter-options" style="display: none;">
+            <select id="filter-select">
+              <!-- The options will be added dynamically in JavaScript -->
+            </select>
+          </div>
         </div>
         <ul id="error-example-list" class="container-left-list scrollable-list">
           <!-- The list items will be added dynamically in JavaScript -->
@@ -236,6 +241,16 @@
           document.getElementById('default-prediction-text').style.display = 'block';
           document.getElementById('default-label-text').textContent = defaultLabel;
           document.getElementById('default-label-text').style.display = 'block';
+
+          // Clear the prediction and label lists
+          var predictionList = document.getElementById('prediction-list');
+          while (predictionList.firstChild) {
+              predictionList.removeChild(predictionList.firstChild);
+          }
+          var labelList = document.getElementById('label-list');
+          while (labelList.firstChild) {
+              labelList.removeChild(labelList.firstChild);
+          }
 
           // Clear other fields
           document.getElementById('full-input').textContent = "";
@@ -674,8 +689,28 @@
         return selectedCombinations.filter(item => item.category === value).length;
       }
 
+      // Trigger generator to create a schema with classifier
       function confirmGenerateSchema(isChecked, selectedSchema) {
-        // TODO - your code here
+        function confirmGenerateSchema(isChecked, selectedSchema) {
+          var url = '/generate-schema';
+          var data = { isChecked: isChecked, selectedSchema: selectedSchema };
+
+          fetch(url, {
+              method: 'POST', 
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(data), 
+          })
+          .then(response => response.json())
+          .then(data => {
+              console.log('Success:', data);
+              generatorRunning = true;
+          })
+          .catch((error) => {
+              console.error('Error:', error);
+          });
+        }
       }
 
       // Function to update the visibility of the model modal based on generatorRunning
@@ -691,6 +726,97 @@
           generatingDiv.style.display = 'none';
         }
       }
+
+      // Search functionality - error list
+      document.getElementById('search-input').addEventListener('input', function() {
+        var filter = this.value.toUpperCase();
+        var li = document.getElementById('error-example-list').getElementsByTagName('li');
+
+        for (var i = 0; i < li.length; i++) {
+            var txtValue = li[i].textContent || li[i].innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                li[i].style.display = "";
+            } else {
+                li[i].style.display = "none";
+            }
+        }
+      });
+
+      // Store the previous selection
+      var previousSelection = '';
+      // Filter functionality - error list
+      function openFilterOptions() {
+        var filterOptions = document.getElementById('filter-options');
+        var filterSelect = document.getElementById('filter-select');
+        var errorCategoryList = document.getElementById('error-category-list').getElementsByTagName('li');
+        var filterButton = document.getElementById('filter-button');
+
+        // If the dropdown menu is already open, hide it and return
+        if (filterOptions.style.display === 'block') {
+            filterOptions.style.display = 'none';
+            previousSelection = filterSelect.value;
+            return;
+        }
+
+        // Clear the current options
+        filterSelect.innerHTML = '';
+
+        // Add a default option
+        var defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.text = 'Select an option';
+        filterSelect.appendChild(defaultOption);
+
+        // Add an option for each error category
+        for (var i = 0; i < errorCategoryList.length; i++) {
+          // Get the category span
+          var categorySpan = errorCategoryList[i].querySelector('.category-text').textContent;
+          var option = document.createElement('option');
+          option.value = categorySpan;
+          option.text = categorySpan;
+          filterSelect.appendChild(option);
+        }
+
+        // If the filter button is green and a previous selection exists, load the previous selection
+        if (filterButton.style.backgroundColor === 'green' && previousSelection !== '') {
+            filterSelect.value = previousSelection;
+        }
+
+        // Show the dropdown menu
+        filterOptions.style.display = 'block';
+      }
+
+      // Filter functionality - select box
+      document.getElementById('filter-select').addEventListener('change', function() {
+        // Get the filter button
+        var filterButton = document.getElementById('filter-button');
+        var errorListItems = document.getElementById('error-example-list').querySelectorAll('li');
+
+        if (this.value === '') {
+          // If the default option is selected, show all error list items and change the background color back to its original color
+          errorListItems.forEach(function(errorItem) {
+              errorItem.style.display = '';
+          });
+          filterButton.style.backgroundColor = '';
+          // Hide the dropdown menu
+          document.getElementById('filter-options').style.display = 'none';
+        } else {
+          // If an error category is selected, hide all error list items that don't belong to the selected category and change the background color to green
+          errorListItems.forEach(function(errorItem) {
+              var errorText = errorItem.querySelector('.error-text').textContent;
+              var belongsToSelectedCategory = selectedCombinations.some(function(combination) {
+                  return combination.error === errorText && combination.category === this.value;
+              }, this);
+
+              if (belongsToSelectedCategory) {
+                  errorItem.style.display = '';
+              } else {
+                  errorItem.style.display = 'none';
+              }
+          }, this);
+          filterButton.style.backgroundColor = 'green';
+        }
+      });
 
       // Everything modal related
       var modal1 = document.getElementById("saveSchemaModal");

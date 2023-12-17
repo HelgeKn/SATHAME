@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request
+from schema_generator import generate_schema
 import os
 import json
 
@@ -74,6 +75,16 @@ def get_dataset(dataset_name):
         return jsonify({'data': parsed_data}), 200
     except Exception as e:
         return str(e), 500
+    
+@app.route('/generate-schema', methods=['POST'])
+def generate_schema():
+    data = request.get_json()
+    isChecked = data.get('isChecked')
+    selectedSchema = data.get('selectedSchema')
+
+    job_id = generate_schema(isChecked, selectedSchema)
+
+    return jsonify({'message': 'Schema generation started', 'job_id': job_id}), 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)

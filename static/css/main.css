@@ -263,3 +263,8 @@ li:hover {
   padding: 0 10px;
   cursor: pointer;
 }
+
+#filter-options {
+  position: relative;
+  top: 5px;  /* Adjust this value as needed */
+}
